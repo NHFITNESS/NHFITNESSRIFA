@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rifa NH-Fitness</title>
+<style>
+  :root{
+    --naranja:#f7941e; --negro:#1a1a1a; --blanco:#ffffff; --verde:#2ecc71; --rojo:#e74c3c;
+  }
+  *{box-sizing:border-box; font-family:'Segoe UI',Arial,sans-serif;}
+  body{margin:0; background:#f4f4f4; padding-bottom:40px;}
+  header{
+    background:var(--negro); color:#fff; text-align:center; padding:15px;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  header img{max-width:110px; border-radius:10px;}
+  header h2{margin:5px 0 0 0; color:var(--naranja);}
+  header p{margin:0; font-size:14px; opacity:.9;}
+
+  .precio-banner{
+    background:var(--naranja); color:var(--negro); text-align:center;
+    font-weight:bold; padding:8px; font-size:16px;
+  }
+
+  .stats{
+    display:flex; justify-content:center; gap:20px; margin:15px 0; flex-wrap:wrap;
+  }
+  .stat-box{
+    background:#fff; border-radius:10px; padding:10px 20px; text-align:center;
+    box-shadow:0 2px 6px rgba(0,0,0,.15); min-width:110px;
+  }
+  .stat-box .num{font-size:22px; font-weight:bold;}
+  .stat-box.vendidos .num{color:var(--rojo);}
+  .stat-box.disponibles .num{color:var(--verde);}
+
+  .toolbar{
+    display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:10px auto;
+    max-width:600px; padding:0 10px;
+  }
+  #buscador{
+    flex:1; min-width:200px; padding:10px; border-radius:8px; border:1px solid #ccc;
+  }
+  #loginBtn, #logoutBtn{
+    padding:10px 15px; border:none; border-radius:8px; background:var(--naranja);
+    color:var(--negro); font-weight:bold; cursor:pointer;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(58px,1fr));
+    gap:6px; max-width:1000px; margin:20px auto; padding:0 10px;
+  }
+  .numero{
+    aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;
+    border-radius:8px; font-weight:bold; color:#fff; cursor:pointer;
+    font-size:13px; user-select:none; transition:transform .1s;
+    border:2px solid rgba(0,0,0,.15);
+  }
+  .numero:hover{transform:scale(1.08);}
+  .disponible{background:var(--verde);}
+  .vendido{background:var(--rojo);}
+
+  .overlay{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.6);
+    align-items:center; justify-content:center; z-index:999; padding:15px;
+  }
+  .overlay.active{display:flex;}
+  .modal{
+    background:#fff; border-radius:12px; padding:20px; width:100%; max-width:360px;
+  }
+  .modal h3{margin-top:0; text-align:center; color:var(--negro);}
+  .modal label{display:block; margin-top:10px; font-size:14px; font-weight:bold;}
+  .modal input{
+    width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:6px;
+  }
+  .modal-buttons{display:flex; gap:10px; margin-top:18px;}
+  .modal-buttons button{
+    flex:1; padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;
+  }
+  .btn-guardar{background:var(--verde); color:#fff;}
+  .btn-eliminar{background:var(--rojo); color:#fff;}
+  .btn-cerrar{background:#ccc;}
+  .loading{text-align:center; padding:20px; color:#888;}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="logo.png" alt="Logo NH Fitness">
+  <h2>🎟 Rifa NH-Fitness</h2>
+  <p>¡Participá y ganá!</p>
+</header>
+
+<div class="precio-banner">💵 Valor del número: $5000</div>
+
+<div class="stats">
+  <div class="stat-box vendidos">
+    <div class="num" id="countVendidos">0</div>
+    <div>Vendidos</div>
+  </div>
+  <div class="stat-box disponibles">
+    <div class="num" id="countDisponibles">1000</div>
+    <div>Disponibles</div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <input id="buscador" type="text" placeholder="Buscar número, nombre o teléfono...">
+  <button id="loginBtn" onclick="abrirLogin()">🔒 Admin</button>
+  <button id="logoutBtn" style="display:none;" onclick="logout()">Salir</button>
+</div>
+
+<div id="cargando" class="loading">Cargando números...</div>
+<div class="grid" id="grid"></div>
+
+<!-- MODAL NUMERO -->
+<div class="overlay" id="overlayNumero">
+  <div class="modal">
+    <h3 id="tituloModal">Número 000</h3>
+    <div id="soloLectura" style="display:none;">
+      <p><b>Comprador:</b> <span id="verNombre"></span></p>
+      <p><b>Teléfono/IG:</b> <span id="verContacto"></span></p>
+    </div>
+    <div id="formularioAdmin">
+      <label>Nombre del comprador</label>
+      <input type="text" id="inputNombre" placeholder="Ej: Juan Pérez">
+      <label>Teléfono / Instagram</label>
+      <input type="text" id="inputContacto" placeholder="Ej: @juanperez o 099123456">
+    </div>
+    <div class="modal-buttons" id="botonesAdmin">
+      <button class="btn-guardar" onclick="guardarNumero()">Guardar</button>
+      <button class="btn-eliminar" onclick="liberarNumero()">Liberar</button>
+      <button class="btn-cerrar" onclick="cerrarModal()">Cerrar</button>
+    </div>
+    <div class="modal-buttons" id="botonSoloVer" style="display:none;">
+      <button class="btn-cerrar" onclick="cerrarModal()" style="flex:1;">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LOGIN -->
+<div class="overlay" id="overlayLogin">
+  <div class="modal">
+    <h3>Ingreso Administrador</h3>
+    <label>Usuario</label>
+    <input type="text" id="loginUser">
+    <label>Contraseña</label>
+    <input type="password" id="loginPass">
+    <div class="modal-buttons">
+      <button class="btn-guardar" onclick="login()">Ingresar</button>
+      <button class="btn-cerrar" onclick="cerrarLogin()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAqV6XxYj5HgWmNRXdOKvGa2aeYG-X3Rpc",
+  authDomain: "nh-fitness-rifa-987f4.firebaseapp.com",
+  projectId: "nh-fitness-rifa-987f4",
+  storageBucket: "nh-fitness-rifa-987f4.firebasestorage.app",
+  messagingSenderId: "115097433531",
+  appId: "1:115097433531:web:9ba99c6b4e766d01ddc09e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const numerosRef = collection(db, "numeros");
+
+// ---------- CONFIG ADMIN ----------
+const USUARIO_ADMIN = "NHF";
+const PASS_ADMIN = "nhfitness";
+let esAdmin = false;
+let numeroActual = null;
+let datos = {};
+
+function pad(n){ return n.toString().padStart(3,"0"); }
+
+onSnapshot(numerosRef, (snapshot) => {
+  datos = {};
+  snapshot.forEach((docu) => {
+    datos[docu.id] = docu.data();
+  });
+  document.getElementById("cargando").style.display = "none";
+  renderGrid(document.getElementById("buscador").value);
+});
+
+const grid = document.getElementById("grid");
+
+function renderGrid(filtro=""){
+  grid.innerHTML = "";
+  let vendidos = 0;
+  for(let i=0;i<1000;i++){
+    const num = pad(i);
+    const info = datos[num];
+    const vendido = info && info.vendido;
+    if(vendido) vendidos++;
+
+    if(filtro){
+      const f = filtro.toLowerCase();
+      const coincideNum = num.includes(f);
+      const coincideNombre = info && info.nombre && info.nombre.toLowerCase().includes(f);
+      const coincideContacto = info && info.contacto && info.contacto.toLowerCase().includes(f);
+      if(!coincideNum && !coincideNombre && !coincideContacto) continue;
+    }
+
+    const div = document.createElement("div");
+    div.className = "numero " + (vendido ? "vendido" : "disponible");
+    div.textContent = num;
+    div.onclick = () => abrirModalNumero(num);
+    grid.appendChild(div);
+  }
+  document.getElementById("countVendidos").textContent = vendidos;
+  document.getElementById("countDisponibles").textContent = 1000 - vendidos;
+}
+
+window.abrirModalNumero = function(num){
+  numeroActual = num;
+  const info = datos[num];
+  document.getElementById("tituloModal").textContent = "Número " + num;
+
+  const soloLectura = document.getElementById("soloLectura");
+  const formularioAdmin = document.getElementById("formularioAdmin");
+  const botonesAdmin = document.getElementById("botonesAdmin");
+  const botonSoloVer = document.getElementById("botonSoloVer");
+
+  if(esAdmin){
+    formularioAdmin.style.display = "block";
+    soloLectura.style.display = "none";
+    botonesAdmin.style.display = "flex";
+    botonSoloVer.style.display = "none";
+    document.getElementById("inputNombre").value = info ? info.nombre : "";
+    document.getElementById("inputContacto").value = info ? info.contacto : "";
+  } else {
+    formularioAdmin.style.display = "none";
+    botonesAdmin.style.display = "none";
+    botonSoloVer.style.display = "flex";
+    soloLectura.style.display = "block";
+    if(info && info.vendido){
+      document.getElementById("verNombre").textContent = info.nombre;
+      document.getElementById("verContacto").textContent = info.contacto;
+    } else {
+      document.getElementById("verNombre").textContent = "— Disponible —";
+      document.getElementById("verContacto").textContent = "Contactar al organizador para reservar";
+    }
+  }
+  document.getElementById("overlayNumero").classList.add("active");
+}
+
+window.cerrarModal = function(){
+  document.getElementById("overlayNumero").classList.remove("active");
+}
+
+window.guardarNumero = async function(){
+  const nombre = document.getElementById("inputNombre").value.trim();
+  const contacto = document.getElementById("inputContacto").value.trim();
+  if(!nombre || !contacto){
+    alert("Completá nombre y teléfono/IG");
+    return;
+  }
+  await setDoc(doc(db, "numeros", numeroActual), { vendido:true, nombre, contacto });
+  cerrarModal();
+}
+
+window.liberarNumero = async function(){
+  await deleteDoc(doc(db, "numeros", numeroActual));
+  cerrarModal();
+}
+
+window.abrirLogin = function(){
+  if(esAdmin){ return; }
+  document.getElementById("overlayLogin").classList.add("active");
+}
+window.cerrarLogin = function(){
+  document.getElementById("overlayLogin").classList.remove("active");
+}
+window.login = function(){
+  const u = document.getElementById("loginUser").value.trim();
+  const p = document.getElementById("loginPass").value.trim();
+  if(u === USUARIO_ADMIN && p === PASS_ADMIN){
+    esAdmin = true;
+    document.getElementById("loginBtn").style.display = "none";
+    document.getElementById("logoutBtn").style.display = "inline-block";
+    cerrarLogin();
+    alert("Bienvenido, administrador");
+  } else {
+    alert("Usuario o contraseña incorrectos");
+  }
+}
+window.logout = function(){
+  esAdmin = false;
+  document.getElementById("loginBtn").style.display = "inline-block";
+  document.getElementById("logoutBtn").style.display = "none";
+}
+
+document.getElementById("buscador").addEventListener("input", (e)=>{
+  renderGrid(e.target.value);
+});
+</script>
+
+</body>
+</html>
