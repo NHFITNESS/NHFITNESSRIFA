@@ -9,7 +9,24 @@
     --naranja:#f7941e; --negro:#1a1a1a; --blanco:#ffffff; --verde:#2ecc71; --rojo:#e74c3c;
   }
   *{box-sizing:border-box; font-family:'Segoe UI',Arial,sans-serif;}
-  body{margin:0; background:#f4f4f4; padding-bottom:40px;}
+  
+body{margin:0; background:#f4f4f4; padding-bottom:40px;}
+<!-- MODAL BIENVENIDA -->
+<div class="overlay active" id="overlayBienvenida">
+  <div class="modal" style="text-align:center;">
+    <h3>🏆 ¡Bienvenido a la Rifa NH-Fitness!</h3>
+    <p style="font-size:14px; color:#333; margin:15px 0;">
+      Esta rifa tiene como objetivo recaudar fondos para nuestro grupo de entrenamiento.
+      ¡Gracias por tu apoyo y por sumarte a esta causa!
+    </p>
+    <div class="modal-buttons">
+      <a href="https://www.instagram.com/nh.fitnes?igsh=b2dxdTJuNzlqZTNx" target="_blank" style="flex:1; text-decoration:none;">
+        <button class="btn-guardar" style="width:100%;">📸 Seguinos en Instagram</button>
+      </a>
+      <button class="btn-cerrar" onclick="cerrarBienvenida()" style="flex:1;">Cerrar</button>
+    </div>
+  </div>
+</div>
   header{
     background:var(--negro); color:#fff; text-align:center; padding:15px;
     display:flex; flex-direction:column; align-items:center; gap:8px;
@@ -82,8 +99,20 @@
   .btn-eliminar{background:var(--rojo); color:#fff;}
   .btn-cerrar{background:#ccc;}
   .loading{text-align:center; padding:20px; color:#888;}
-</style>
+</style><script>
+window.cerrarBienvenida = function(){
+  document.getElementById("overlayBienvenida").classList.remove("active");
+  localStorage.setItem("rifaBienvenidaVista", "true");
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  if(localStorage.getItem("rifaBienvenidaVista") === "true"){
+    document.getElementById("overlayBienvenida").classList.remove("active");
+  }
+});
+</script>
 </head>
+
 <body>
 
 <header>
