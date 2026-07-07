@@ -391,4 +391,35 @@ async function abrirModalAdmin(n){
 }
 
 async function confirmarPagoAdmin(id){
-  await updateDoc(doc(db,"numeros",id), { vendido: true, reservado:
+  await updateDoc(doc(db,"numeros",id), { vendido: true, reservado: false, reservadoHasta: null });
+  cerrarModalAdmin();
+}
+
+async function liberarNumeroAdmin(id){
+  await updateDoc(doc(db,"numeros",id), { vendido: false, reservado: false, reservadoHasta: null });
+  cerrarModalAdmin();
+}
+
+function cerrarModalAdmin(){
+  document.getElementById("overlayNumero").classList.remove("active");
+}
+
+window.abrirLogin = function(){ document.getElementById("overlayLogin").classList.add("active"); };
+window.cerrarLogin = function(){ document.getElementById("overlayLogin").classList.remove("active"); };
+window.cerrarBienvenida = function(){ document.getElementById("overlayBienvenida").classList.remove("active"); };
+
+setInterval(async ()=>{
+  if(!esAdmin) return;
+  const ahora = Date.now();
+  for(const n of numeros){
+    if(n.reservado && n.reservadoHasta && ahora > n.reservadoHasta){
+      await updateDoc(doc(db,"numeros",n.id), { reservado:false, reservadoHasta:null });
+    }
+  }
+}, 15000);
+
+document.getElementById("buscador").addEventListener("input", render);
+</script>
+
+</body>
+</html>
