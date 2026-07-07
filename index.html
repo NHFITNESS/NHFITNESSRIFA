@@ -234,3 +234,290 @@
     </div>
   </div>
 </div>
+
+<script>
+/* ===== CONFIG ===== */
+const TOTAL_NUMEROS = 1000;
+const PRECIO_UNITARIO = 5000;
+const MINUTOS_RESERVA = 15;
+const ADMIN_USER = "admin@correo.com";
+const ADMIN_PASS = "1234"; // ⚠ Cambiar - solo demo, no es seguro en frontend puro
+
+let numeros = [];
+let seleccionados = [];
+let esAdmin = false;
+let numeroActivo = null;
+
+/* ===== PERSISTENCIA (localStorage) ===== */
+function cargarNumeros(){
+  const guardado = localStorage.getItem("rifaNumeros");
+  if(guardado){
+    numeros = JSON.parse(guardado);
+  } else {
+    numeros = [];
+    for(let i=0;i<TOTAL_NUMEROS;i++){
+      numeros.push({
+        id: i.toString().padStart(3,"0"),
+        estado: "disponible", // disponible | reservado | vendido
+        nombre: "",
+        contacto: "",
+        reservadoHasta: null
+      });
+    }
+    guardarNumeros();
+  }
+}
+function guardarNumeros(){
+  localStorage.setItem("rifaNumeros", JSON.stringify(numeros));
+}
+
+/* ===== RENDER ===== */
+function render(){
+  liberarVencidos();
+  const grid = document.getElementById("grid");
+  const filtro = document.getElementById("buscador").value.trim();
+  grid.innerHTML = "";
+  document.getElementById("cargando").style.display = "none";
+
+  let vendidos=0, reservados=0, disponibles=0;
+
+  numeros.forEach(n=>{
+    if(filtro && !n.id.includes(filtro)) return;
+
+    const div = document.createElement("div");
+    div.className = "numero " + n.estado;
+    if(seleccionados.includes(n.id)) div.className = "numero seleccionado";
+    div.textContent = n.id;
+    div.onclick = () => onClickNumero(n.id);
+    grid.appendChild(div);
+  });
+
+  numeros.forEach(n=>{
+    if(n.estado==="vendido") vendidos++;
+    else if(n.estado==="reservado") reservados++;
+    else disponibles++;
+  });
+
+  document.getElementById("countVendidos").textContent = vendidos;
+  document.getElementById("countReservados").textContent = reservados;
+  document.getElementById("countDisponibles").textContent = disponibles;
+
+  actualizarBarraSeleccion();
+}
+
+/* ===== LIBERACION AUTOMATICA 15 MIN ===== */
+function liberarVencidos(){
+  const ahora = Date.now();
+  let cambio = false;
+  numeros.forEach(n=>{
+    if(n.estado==="reservado" && n.reservadoHasta && ahora > n.reservadoHasta){
+      n.estado = "disponible";
+      n.nombre = "";
+      n.contacto = "";
+      n.reservadoHasta = null;
+      cambio = true;
+    }
+  });
+  if(cambio) guardarNumeros();
+}
+
+/* ===== CLICK EN UN NUMERO ===== */
+function onClickNumero(id){
+  const n = numeros.find(x=>x.id===id);
+
+  if(esAdmin){
+    abrirModalAdmin(n);
+    return;
+  }
+
+  // Modo vendedor: solo puede tocar disponibles o des-seleccionar los propios
+  if(n.estado === "disponible"){
+    const idx = seleccionados.indexOf(id);
+    if(idx>-1) seleccionados.splice(idx,1);
+    else seleccionados.push(id);
+    render();
+  } else if(n.estado === "reservado"){
+    alert("Este número ya fue reservado por otro comprador. Espera a que se libere o elige otro.");
+  } else {
+    alert("Este número ya fue vendido.");
+  }
+}
+
+/* ===== BARRA DE SELECCION (vendedor) ===== */
+function actualizarBarraSeleccion(){
+  const barra = document.getElementById("barraSeleccion");
+  if(seleccionados.length>0){
+    barra.classList.add("activa");
+    document.getElementById("cantSeleccionados").textContent = seleccionados.length;
+    document.getElementById("totalSeleccion").textContent = "$" + (seleccionados.length*PRECIO_UNITARIO).toLocaleString("es-AR");
+  } else {
+    barra.classList.remove("activa");
+  }
+}
+
+function cancelarSeleccion(){
+  seleccionados = [];
+  render();
+}
+
+/* ===== MODAL RESERVA (pop-up con numeros + monto + alias) ===== */
+function abrirReserva(){
+  if(seleccionados.length===0) return;
+  document.getElementById("listaSeleccionados").textContent = seleccionados.join(", ");
+  document.getElementById("montoTotal").textContent = "$" + (seleccionados.length*PRECIO_UNITARIO).toLocaleString("es-AR");
+  document.getElementById("overlayReserva").classList.add("active");
+}
+
+function cancelarReserva(){
+  document.getElementById("overlayReserva").classList.remove("active");
+}
+
+function confirmarReserva(){
+  const nombre = document.getElementById("reservaNombre").value.trim();
+  const telefono = document.getElementById("reservaTelefono").value.trim();
+
+  if(!nombre || !telefono){
+    alert("Por favor completá tu nombre y teléfono.");
+    return;
+  }
+
+  const vencimiento = Date.now() + MINUTOS_RESERVA*60*1000;
+
+  seleccionados.forEach(id=>{
+    const n = numeros.find(x=>x.id===id);
+    n.estado = "reservado";
+    n.nombre = nombre;
+    n.contacto = telefono;
+    n.reservadoHasta = vencimiento;
+  });
+
+  guardarNumeros();
+  seleccionados = [];
+  document.getElementById("overlayReserva").classList.remove("active");
+  document.getElementById("reservaNombre").value = "";
+  document.getElementById("reservaTelefono").value = "";
+  render();
+
+  alert("✅ Números reservados por 15 minutos. Recordá transferir al alias NH.rifa antes de que venza el tiempo.");
+}
+
+/* ===== MODAL NUMERO (solo administrador confirma o libera) ===== */
+function abrirModalAdmin(n){
+  numeroActivo = n.id;
+  document.getElementById("tituloModal").textContent = "Número " + n.id;
+  document.getElementById("formularioAdmin").style.display = "block";
+  document.getElementById("inputNombre").value = n.nombre || "";
+  document.getElementById("inputContacto").value = n.contacto || "";
+
+  let estadoTexto = "";
+  if(n.estado==="disponible") estadoTexto = "🟢 Disponible";
+  if(n.estado==="reservado"){
+    const restante = Math.max(0, Math.ceil((n.reservadoHasta - Date.now())/60000));
+    estadoTexto = `🟡 Reservado — vence en ${restante} min`;
+  }
+  if(n.estado==="vendido") estadoTexto = "🔴 Vendido";
+  document.getElementById("infoEstado").innerHTML = "<p><b>Estado:</b> "+estadoTexto+"</p>";
+
+  const botones = document.getElementById("botonesModal");
+  botones.innerHTML = "";
+
+  if(n.estado==="reservado"){
+    const btnConfirmar = document.createElement("button");
+    btnConfirmar.className = "btn-guardar";
+    btnConfirmar.textContent = "✅ Confirmar pago recibido";
+    btnConfirmar.onclick = () => confirmarPagoAdmin(n.id);
+    botones.appendChild(btnConfirmar);
+
+    const btnLiberar = document.createElement("button");
+    btnLiberar.className = "btn-eliminar";
+    btnLiberar.textContent = "Liberar número";
+    btnLiberar.onclick = () => liberarNumeroAdmin(n.id);
+    botones.appendChild(btnLiberar);
+  }
+
+  if(n.estado==="vendido"){
+    const btnLiberar = document.createElement("button");
+    btnLiberar.className = "btn-eliminar";
+    btnLiberar.textContent = "Anular venta";
+    btnLiberar.onclick = () => liberarNumeroAdmin(n.id);
+    botones.appendChild(btnLiberar);
+  }
+
+  const btnCerrar = document.createElement("button");
+  btnCerrar.className = "btn-cerrar";
+  btnCerrar.textContent = "Cerrar";
+  btnCerrar.onclick = cerrarModalAdmin;
+  botones.appendChild(btnCerrar);
+
+  document.getElementById("overlayNumero").classList.add("active");
+}
+
+function confirmarPagoAdmin(id){
+  const n = numeros.find(x=>x.id===id);
+  n.estado = "vendido";
+  n.reservadoHasta = null;
+  guardarNumeros();
+  cerrarModalAdmin();
+  render();
+}
+
+function liberarNumeroAdmin(id){
+  const n = numeros.find(x=>x.id===id);
+  n.estado = "disponible";
+  n.nombre = "";
+  n.contacto = "";
+  n.reservadoHasta = null;
+  guardarNumeros();
+  cerrarModalAdmin();
+  render();
+}
+
+function cerrarModalAdmin(){
+  document.getElementById("overlayNumero").classList.remove("active");
+  numeroActivo = null;
+}
+
+/* ===== LOGIN ADMIN ===== */
+function abrirLogin(){
+  document.getElementById("overlayLogin").classList.add("active");
+}
+function cerrarLogin(){
+  document.getElementById("overlayLogin").classList.remove("active");
+}
+function login(){
+  const user = document.getElementById("loginUser").value.trim();
+  const pass = document.getElementById("loginPass").value.trim();
+  if(user===ADMIN_USER && pass===ADMIN_PASS){
+    esAdmin = true;
+    document.getElementById("loginBtn").style.display = "none";
+    document.getElementById("logoutBtn").style.display = "inline-block";
+    cerrarLogin();
+    seleccionados = [];
+    render();
+  } else {
+    alert("Usuario o contraseña incorrectos.");
+  }
+}
+function logout(){
+  esAdmin = false;
+  document.getElementById("loginBtn").style.display = "inline-block";
+  document.getElementById("logoutBtn").style.display = "none";
+  render();
+}
+
+/* ===== BIENVENIDA ===== */
+function cerrarBienvenida(){
+  document.getElementById("overlayBienvenida").classList.remove("active");
+}
+
+/* ===== BUSCADOR ===== */
+document.getElementById("buscador").addEventListener("input", render);
+
+/* ===== INICIO ===== */
+cargarNumeros();
+render();
+setInterval(render, 15000); // revisa liberaciones automáticas cada 15s
+</script>
+
+</body>
+</html>
