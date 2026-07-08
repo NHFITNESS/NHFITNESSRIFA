@@ -1,0 +1,254 @@
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Administrador — Rifa NH-Fitness</title>
+<style>
+  :root{--naranja:#f7941e; --negro:#1a1a1a; --verde:#2ecc71; --rojo:#e74c3c; --amarillo:#f1c40f; --azul:#3498db;}
+  *{box-sizing:border-box; font-family:'Segoe UI',Arial,sans-serif;}
+  body{margin:0; background:#f4f4f4;}
+  header{background:var(--negro); color:#fff; text-align:center; padding:15px;}
+  header h2{margin:0; color:var(--naranja);}
+  .stats{display:flex; justify-content:center; gap:14px; margin:15px 0; flex-wrap:wrap;}
+  .stat-box{background:#fff; border-radius:10px; padding:10px 16px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,.15); min-width:95px;}
+  .stat-box .num{font-size:22px; font-weight:bold;}
+  .stat-box.vendidos .num{color:var(--rojo);}
+  .stat-box.reservados .num{color:#b8860b;}
+  .stat-box.disponibles .num{color:var(--verde);}
+  .toolbar{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:10px auto; max-width:600px; padding:0 10px;}
+  #buscador{flex:1; min-width:200px; padding:10px; border-radius:8px; border:1px solid #ccc;}
+  #logoutBtn{padding:10px 15px; border:none; border-radius:8px; background:var(--naranja); color:var(--negro); font-weight:bold; cursor:pointer;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(58px,1fr)); gap:6px; max-width:1000px; margin:20px auto; padding:0 10px;}
+  .numero{aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:bold; color:#fff; cursor:pointer; font-size:13px; user-select:none; border:2px solid rgba(0,0,0,.15);}
+  .disponible{background:var(--verde);}
+  .vendido{background:var(--rojo);}
+  .reservado{background:var(--amarillo); color:#1a1a1a;}
+  .overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); align-items:center; justify-content:center; z-index:999; padding:15px;}
+  .overlay.active{display:flex;}
+  .modal{background:#fff; border-radius:12px; padding:20px; width:100%; max-width:360px;}
+  .modal h3{margin-top:0; text-align:center;}
+  .modal label{display:block; margin-top:10px; font-size:14px; font-weight:bold;}
+  .modal input{width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:6px;}
+  .modal-buttons{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;}
+  .modal-buttons button{flex:1; padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; min-width:90px;}
+  .btn-guardar{background:var(--verde); color:#fff;}
+  .btn-eliminar{background:var(--rojo); color:#fff;}
+  .btn-cerrar{background:#ccc;}
+  .loading{text-align:center; padding:20px; color:#888;}
+</style>
+</head>
+<body>
+
+<header><h2>🔒 Panel Administrador — Rifa NH-Fitness</h2></header>
+
+<div id="pantallaLogin" style="max-width:360px; margin:40px auto; background:#fff; padding:20px; border-radius:12px;">
+  <h3>Ingreso Administrador</h3>
+  <label>Email</label>
+  <input type="text" id="loginUser" placeholder="nhf@nhfitness.com" style="width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:6px;">
+  <label>Contraseña</label>
+  <input type="password" id="loginPass" style="width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:6px;">
+  <button onclick="login()" style="width:100%; margin-top:15px; padding:10px; background:var(--verde); color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Ingresar</button>
+</div>
+
+<div id="panelAdmin" style="display:none;">
+  <div class="stats">
+    <div class="stat-box vendidos"><div class="num" id="countVendidos">0</div><div>Vendidos</div></div>
+    <div class="stat-box reservados"><div class="num" id="countReservados">0</div><div>Reservados</div></div>
+    <div class="stat-box disponibles"><div class="num" id="countDisponibles">1000</div><div>Disponibles</div></div>
+  </div>
+
+  <div class="toolbar">
+    <input id="buscador" type="text" placeholder="Buscar número...">
+    <button id="logoutBtn" onclick="logout()">Salir</button>
+  </div>
+
+  <div id="cargando" class="loading">Cargando números...</div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="overlay" id="overlayNumero">
+  <div class="modal">
+    <h3 id="tituloModal">Número 000</h3>
+    <div id="infoEstado"></div>
+    <div id="formularioAdmin">
+      <p><b>Nombre:</b> <span id="verNombre">-</span></p>
+      <p><b>Teléfono:</b> <span id="verContacto">-</span></p>
+    </div>
+    <div class="modal-buttons" id="botonesModal"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, getDoc, onSnapshot, updateDoc, orderBy, query
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAqV6XxYj5HgWmNRXdOKvGa2aeYG-X3Rpc",
+  authDomain: "nh-fitness-rifa-987f4.firebaseapp.com",
+  projectId: "nh-fitness-rifa-987f4",
+  storageBucket: "nh-fitness-rifa-987f4.firebasestorage.app",
+  messagingSenderId: "115097433531",
+  appId: "1:115097433531:web:9ba99c6b4e766d01ddc09e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let numeros = [];
+let esAdmin = false;
+
+onAuthStateChanged(auth, (user) => {
+  esAdmin = !!user;
+  document.getElementById("pantallaLogin").style.display = esAdmin ? "none" : "block";
+  document.getElementById("panelAdmin").style.display = esAdmin ? "block" : "none";
+  if(esAdmin) iniciarEscuchaNumeros();
+});
+
+window.login = function(){
+  const email = document.getElementById("loginUser").value.trim();
+  const pass = document.getElementById("loginPass").value.trim();
+  signInWithEmailAndPassword(auth, email, pass)
+    .catch((err) => { alert("Usuario o contraseña incorrectos."); console.error(err); });
+};
+
+window.logout = function(){ signOut(auth); };
+
+function iniciarEscuchaNumeros(){
+  const q = query(collection(db, "numeros"), orderBy("__name__"));
+  onSnapshot(q, (snapshot) => {
+    numeros = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    document.getElementById("cargando").style.display = "none";
+    render();
+  });
+}
+
+function estadoDe(n){
+  if(n.vendido) return "vendido";
+  if(n.reservado) return "reservado";
+  return "disponible";
+}
+
+window.render = function(){
+  const grid = document.getElementById("grid");
+  const filtro = document.getElementById("buscador").value.trim();
+  grid.innerHTML = "";
+
+  let vendidos=0, reservados=0, disponibles=0;
+
+  numeros.forEach(n=>{
+    if(filtro && !n.id.includes(filtro)) return;
+    const estado = estadoDe(n);
+    const div = document.createElement("div");
+    div.className = "numero " + estado;
+    div.textContent = n.id;
+    div.onclick = () => abrirModalAdmin(n);
+    grid.appendChild(div);
+  });
+
+  numeros.forEach(n=>{
+    const estado = estadoDe(n);
+    if(estado==="vendido") vendidos++;
+    else if(estado==="reservado") reservados++;
+    else disponibles++;
+  });
+
+  document.getElementById("countVendidos").textContent = vendidos;
+  document.getElementById("countReservados").textContent = reservados;
+  document.getElementById("countDisponibles").textContent = disponibles;
+};
+
+async function abrirModalAdmin(n){
+  const estado = estadoDe(n);
+  document.getElementById("tituloModal").textContent = "Número " + n.id;
+
+  document.getElementById("verNombre").textContent = "-";
+  document.getElementById("verContacto").textContent = "-";
+
+  if(estado === "reservado" || estado === "vendido"){
+    try{
+      const snap = await getDoc(doc(db,"compradores_privados",n.id));
+      if(snap.exists()){
+        document.getElementById("verNombre").textContent = snap.data().nombre || "-";
+        document.getElementById("verContacto").textContent = snap.data().contacto || "-";
+      }
+    }catch(err){ console.error(err); }
+  }
+
+  let estadoTexto = "";
+  if(estado==="disponible") estadoTexto = "🟢 Disponible";
+  if(estado==="reservado"){
+    const restante = Math.max(0, Math.ceil((n.reservadoHasta - Date.now())/60000));
+    estadoTexto = `🟡 Reservado — vence en ${restante} min`;
+  }
+  if(estado==="vendido") estadoTexto = "🔴 Vendido";
+  document.getElementById("infoEstado").innerHTML = "<p><b>Estado:</b> "+estadoTexto+"</p>";
+
+  const botones = document.getElementById("botonesModal");
+  botones.innerHTML = "";
+
+  if(estado==="reservado"){
+    const btnConfirmar = document.createElement("button");
+    btnConfirmar.className = "btn-guardar";
+    btnConfirmar.textContent = "✅ Confirmar pago recibido";
+    btnConfirmar.onclick = () => confirmarPagoAdmin(n.id);
+    botones.appendChild(btnConfirmar);
+
+    const btnLiberar = document.createElement("button");
+    btnLiberar.className = "btn-eliminar";
+    btnLiberar.textContent = "Liberar número";
+    btnLiberar.onclick = () => liberarNumeroAdmin(n.id);
+    botones.appendChild(btnLiberar);
+  }
+
+  if(estado==="vendido"){
+    const btnLiberar = document.createElement("button");
+    btnLiberar.className = "btn-eliminar";
+    btnLiberar.textContent = "Anular venta";
+    btnLiberar.onclick = () => liberarNumeroAdmin(n.id);
+    botones.appendChild(btnLiberar);
+  }
+
+  const btnCerrar = document.createElement("button");
+  btnCerrar.className = "btn-cerrar";
+  btnCerrar.textContent = "Cerrar";
+  btnCerrar.onclick = cerrarModalAdmin;
+  botones.appendChild(btnCerrar);
+
+  document.getElementById("overlayNumero").classList.add("active");
+}
+
+async function confirmarPagoAdmin(id){
+  await updateDoc(doc(db,"numeros",id), { vendido: true, reservado: false, reservadoHasta: null });
+  cerrarModalAdmin();
+}
+
+async function liberarNumeroAdmin(id){
+  await updateDoc(doc(db,"numeros",id), { vendido: false, reservado: false, reservadoHasta: null });
+  cerrarModalAdmin();
+}
+
+function cerrarModalAdmin(){
+  document.getElementById("overlayNumero").classList.remove("active");
+}
+
+setInterval(async ()=>{
+  if(!esAdmin) return;
+  const ahora = Date.now();
+  for(const n of numeros){
+    if(n.reservado && n.reservadoHasta && ahora > n.reservadoHasta){
+      await updateDoc(doc(db,"numeros",n.id), { reservado:false, reservadoHasta:null });
+    }
+  }
+}, 15000);
+
+document.getElementById("buscador")?.addEventListener("input", render);
+</script>
+
+</body>
+</html>
