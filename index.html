@@ -12,6 +12,11 @@
   header h2{margin:5px 0 0 0; color:var(--naranja);}
   .precio-banner{background:var(--naranja); color:var(--negro); text-align:center; font-weight:bold; padding:8px; font-size:16px;}
   .instruccion{text-align:center; font-size:14px; color:#555; margin:14px auto 4px; max-width:500px; padding:0 10px;}
+  .botones-info{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:14px auto; max-width:700px; padding:0 10px;}
+  .btn-info{padding:10px 16px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:6px; color:#fff;}
+  .btn-historia{background:var(--naranja); color:var(--negro);}
+  .btn-instagram-nav{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);}
+  .btn-premios{background:var(--verde);}
   .toolbar{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:10px auto; max-width:600px; padding:0 10px;}
   #buscador{flex:1; min-width:200px; padding:10px; border-radius:8px; border:1px solid #ccc;}
   .leyenda{display:flex; justify-content:center; gap:16px; flex-wrap:wrap; font-size:12px; margin-bottom:6px; color:#444;}
@@ -26,7 +31,7 @@
   .seleccionado{background:var(--azul); box-shadow:0 0 0 3px #1a1a1a inset;}
   .overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); align-items:center; justify-content:center; z-index:999; padding:15px;}
   .overlay.active{display:flex;}
-  .modal{background:#fff; border-radius:12px; padding:20px; width:100%; max-width:360px; max-height:90vh; overflow-y:auto;}
+  .modal{background:#fff; border-radius:12px; padding:20px; width:100%; max-width:380px; max-height:90vh; overflow-y:auto;}
   .modal h3{margin-top:0; text-align:center; color:var(--negro);}
   .modal label{display:block; margin-top:10px; font-size:14px; font-weight:bold;}
   .modal input{width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:6px;}
@@ -45,11 +50,9 @@
   .btn-cancelar-sel{background:var(--rojo); color:#fff;}
   .alias-box{background:#fff8e1; border:2px dashed #b8860b; border-radius:8px; padding:10px; text-align:center; font-size:18px; font-weight:bold; color:#7a5c00; margin:10px 0;}
 
-  /* Timer flotante de reserva */
   .timer-flotante{display:none; position:fixed; top:10px; left:50%; transform:translateX(-50%); background:var(--amarillo); color:#1a1a1a; font-weight:bold; padding:10px 18px; border-radius:30px; box-shadow:0 3px 10px rgba(0,0,0,.25); z-index:950; font-size:14px; text-align:center;}
   .timer-flotante.activo{display:block;}
 
-  /* Toast de notificaciones */
   .toast-container{position:fixed; bottom:100px; left:50%; transform:translateX(-50%); z-index:1100; display:flex; flex-direction:column; gap:8px; align-items:center;}
   .toast{background:#1a1a1a; color:#fff; padding:12px 18px; border-radius:8px; font-size:14px; box-shadow:0 3px 10px rgba(0,0,0,.3); opacity:0; animation:toastIn .3s forwards, toastOut .3s forwards 3s; max-width:90vw; text-align:center;}
   .toast.exito{background:var(--verde);}
@@ -57,6 +60,15 @@
   .toast.info{background:var(--azul);}
   @keyframes toastIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
   @keyframes toastOut{from{opacity:1;} to{opacity:0;}}
+
+  .premio-item{display:flex; justify-content:space-between; align-items:center; background:#f9f9f9; border-radius:8px; padding:12px 14px; margin-bottom:10px; border-left:5px solid var(--naranja);}
+  .premio-item.primero{border-left-color:#f1c40f;}
+  .premio-item.segundo{border-left-color:#bdc3c7;}
+  .premio-item.tercero{border-left-color:#cd7f32;}
+  .premio-item .lugar{font-weight:bold; color:var(--negro);}
+  .premio-item .valor{font-weight:bold; color:var(--verde); font-size:15px;}
+  .sorteo-info{background:#eef3fb; border-left:5px solid #34495e; border-radius:8px; padding:12px 14px; margin-top:16px; font-size:13px; color:#2c3e50; line-height:1.5;}
+  .sorteo-info h4{margin:0 0 8px 0; font-size:14px; color:#1a1a1a;}
 </style>
 </head>
 <body>
@@ -67,34 +79,8 @@
     <p style="font-size:14px; color:#333; margin:15px 0; text-align:left;">
       Esta rifa es un homenaje a Nacho: profesor, guía y ejemplo de superación. Con tu compra ayudás a que NH Fitness siga creciendo y a que Nacho consiga un motocarro para facilitar su trabajo diario.
     </p>
-    <button class="btn-cerrar btn-secundario" style="width:100%; margin-bottom:10px;" onclick="toggleHistoriaCompleta()">📖 Leer la historia completa</button>
-
-    <div id="historiaCompleta" style="display:none; font-size:14px; color:#333; line-height:1.5; text-align:left; margin-bottom:10px;">
-      <p>Hay personas que enseñan con palabras. Otras enseñan con el ejemplo.</p>
-      <p>Quienes conocen a Nacho saben que nunca fue solamente un profesor de entrenamiento. Siempre fue ese que alentó cuando alguien quería abandonar, el que creyó en sus alumnos cuando ellos mismos habían dejado de creer, el que demostró que la disciplina y la constancia pueden cambiar una vida.</p>
-      <p>Pero hace un tiempo, la vida le puso la prueba más difícil.</p>
-      <p>Un accidente cambió todo. Perdió una pierna, enfrentó meses de internaciones, cirugías y rehabilitación. Lo que para muchos habría significado un final, para él fue el comienzo de una nueva forma de vivir.</p>
-      <p>Porque Nacho nunca dejó que una amputación definiera quién era.</p>
-      <p>Volvió a entrenar. Volvió a enseñar. Volvió a acompañar a cada persona que confía en él. Con una prótesis, con esfuerzo y con la misma pasión de siempre. Porque su propósito siempre fue más grande que cualquier obstáculo.</p>
-      <p>Hoy queremos hacer algo por él.</p>
-      <p>No porque no pueda hacerlo solo, sino porque creemos en todo lo que construyó. Porque NH Fitness es mucho más que un grupo de entrenamiento: es un lugar donde muchas personas encontraron salud, confianza, disciplina y una comunidad que las impulsa a ser mejores.</p>
-      <p>Con esta rifa queremos aportar nuestro granito de arena para que NH Fitness siga creciendo y para ayudar a hacer realidad la compra de un motocarro que acompañe ese crecimiento y facilite el trabajo diario de Nacho.</p>
-      <p>Cada número que comprás no es solo una participación.</p>
-      <p>Es una forma de apoyar un proyecto que transforma vidas, de agradecer a alguien que nunca dejó de dar lo mejor de sí y de demostrar que, cuando una comunidad crece unida, los sueños pesan mucho menos.</p>
-      <p>Gracias por ser parte de esta historia.</p>
-      <p>Porque las grandes transformaciones no las hace una sola persona. Las hace una comunidad que decide caminar unida, incluso cuando el camino parece cuesta arriba.</p>
-    </div>
-
     <div class="modal-buttons">
-      <a href="https://www.instagram.com/nh.fitnes?igsh=b2dxdTJuNzlqZTNx" target="_blank" style="flex:1; text-decoration:none;">
-        <button class="btn-guardar" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="white">
-            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.98-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-          </svg>
-          Seguinos en Instagram
-        </button>
-      </a>
-      <button class="btn-cerrar" onclick="cerrarBienvenida()" style="flex:1;">Cerrar</button>
+      <button class="btn-guardar" style="width:100%;" onclick="cerrarBienvenida()">Ingresar</button>
     </div>
   </div>
 </div>
@@ -106,8 +92,16 @@
 
 <div class="precio-banner" id="precioBanner">💵 Valor del número: $5.000</div>
 
-<!-- Timer flotante visible mientras hay una reserva activa -->
 <div class="timer-flotante" id="timerFlotante">⏱ Te quedan <span id="timerTexto">15:00</span> para transferir</div>
+
+<div class="botones-info">
+  <button class="btn-info btn-historia" onclick="abrirModal('overlayHistoria')">📖 CONOCE LA HISTORIA DE NH</button>
+  <button class="btn-info btn-instagram-nav" onclick="abrirModal('overlayInstagram')">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.98-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+    SEGUINOS EN INSTAGRAM
+  </button>
+  <button class="btn-info btn-premios" onclick="abrirModal('overlayPremios')">🏆 VER PREMIOS</button>
+</div>
 
 <p class="instruccion">👉 Tocá los números que querés comprar. Podés elegir más de uno.</p>
 
@@ -130,6 +124,83 @@
   <div class="acciones">
     <button class="btn-reservar" onclick="abrirReserva()">Reservar</button>
     <button class="btn-cancelar-sel" onclick="cancelarSeleccion()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal: Historia completa -->
+<div class="overlay" id="overlayHistoria">
+  <div class="modal">
+    <h3>📖 La historia de Nacho</h3>
+    <div style="font-size:14px; color:#333; line-height:1.5; text-align:left;">
+      <p>Hay personas que enseñan con palabras. Otras enseñan con el ejemplo.</p>
+      <p>Quienes conocen a Nacho saben que nunca fue solamente un profesor de entrenamiento. Siempre fue ese que alentó cuando alguien quería abandonar, el que creyó en sus alumnos cuando ellos mismos habían dejado de creer, el que demostró que la disciplina y la constancia pueden cambiar una vida.</p>
+      <p>Pero hace un tiempo, la vida le puso la prueba más difícil.</p>
+      <p>Un accidente cambió todo. Perdió una pierna, enfrentó meses de internaciones, cirugías y rehabilitación. Lo que para muchos habría significado un final, para él fue el comienzo de una nueva forma de vivir.</p>
+      <p>Porque Nacho nunca dejó que una amputación definiera quién era.</p>
+      <p>Volvió a entrenar. Volvió a enseñar. Volvió a acompañar a cada persona que confía en él. Con una prótesis, con esfuerzo y con la misma pasión de siempre. Porque su propósito siempre fue más grande que cualquier obstáculo.</p>
+      <p>Hoy queremos hacer algo por él.</p>
+      <p>No porque no pueda hacerlo solo, sino porque creemos en todo lo que construyó. Porque NH Fitness es mucho más que un grupo de entrenamiento: es un lugar donde muchas personas encontraron salud, confianza, disciplina y una comunidad que las impulsa a ser mejores.</p>
+      <p>Con esta rifa queremos aportar nuestro granito de arena para que NH Fitness siga creciendo y para ayudar a hacer realidad la compra de un motocarro que acompañe ese crecimiento y facilite el trabajo diario de Nacho.</p>
+      <p>Cada número que comprás no es solo una participación.</p>
+      <p>Es una forma de apoyar un proyecto que transforma vidas, de agradecer a alguien que nunca dejó de dar lo mejor de sí y de demostrar que, cuando una comunidad crece unida, los sueños pesan mucho menos.</p>
+      <p>Gracias por ser parte de esta historia.</p>
+      <p>Porque las grandes transformaciones no las hace una sola persona. Las hace una comunidad que decide caminar unida, incluso cuando el camino parece cuesta arriba.</p>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayHistoria')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Instagram -->
+<div class="overlay" id="overlayInstagram">
+  <div class="modal" style="text-align:center;">
+    <h3>📸 Seguinos en Instagram</h3>
+    <p style="font-size:14px; color:#333;">Enterate de todas las novedades de la rifa y de NH Fitness</p>
+    <div class="modal-buttons" style="flex-direction:column;">
+      <a href="https://www.instagram.com/nh.fitnes?igsh=b2dxdTJuNzlqZTNx" target="_blank" style="text-decoration:none;">
+        <button class="btn-instagram-nav" style="width:100%; padding:12px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:#fff;">@nh.fitnes</button>
+      </a>
+      <a href="https://www.instagram.com/nacho_heinze?igsh=OWJqOWo3M2l0dnky" target="_blank" style="text-decoration:none;">
+        <button class="btn-instagram-nav" style="width:100%; padding:12px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:#fff;">@nacho_heinze</button>
+      </a>
+      <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayInstagram')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Premios + información del sorteo -->
+<div class="overlay" id="overlayPremios">
+  <div class="modal">
+    <h3>🏆 Premios</h3>
+    <div class="premio-item primero">
+      <span class="lugar">🥇 Primer premio</span>
+      <span class="valor">$400.000</span>
+    </div>
+    <div class="premio-item segundo">
+      <span class="lugar">🥈 Segundo premio</span>
+      <span class="valor">$200.000</span>
+    </div>
+    <div class="premio-item tercero">
+      <span class="lugar">🥉 Tercer premio</span>
+      <span class="valor">$100.000</span>
+    </div>
+    <div class="premio-item">
+      <span class="lugar">🎁 Cuarto premio</span>
+      <span class="valor">Parlante JBL Go Essential</span>
+    </div>
+
+    <div class="sorteo-info">
+      <h4>🎲 ¿Cómo se realiza el sorteo?</h4>
+      <p>El sorteo se llevará a cabo el <b>viernes 28 de agosto</b>, utilizando como base los resultados oficiales de la <b>Lotería Nacional – Sorteo Nocturno</b> de esa misma fecha.</p>
+      <p>Para determinar los números ganadores, se tomarán los <b>dos últimos dígitos</b> de los números premiados en dicho sorteo oficial.</p>
+      <p>De esta manera, el resultado depende exclusivamente de un sorteo público, oficial y verificable, garantizando total transparencia en la definición de los ganadores.</p>
+      <p>🔎 Podés verificar los resultados del sorteo de la Lotería Nacional de forma pública una vez finalizado, el mismo día.</p>
+    </div>
+
+    <div class="modal-buttons">
+      <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayPremios')">Cerrar</button>
+    </div>
   </div>
 </div>
 
@@ -277,7 +348,6 @@ window.confirmarReserva = async function(){
       });
     }
 
-    // Guardar la reserva localmente para mostrar el timer flotante
     localStorage.setItem("reservaVencimiento", vencimiento);
     localStorage.setItem("reservaNumeros", JSON.stringify(seleccionados));
     iniciarTimerFlotante();
@@ -295,19 +365,9 @@ window.confirmarReserva = async function(){
 
 window.cerrarBienvenida = function(){ document.getElementById("overlayBienvenida").classList.remove("active"); };
 
-window.toggleHistoriaCompleta = function(){
-  const div = document.getElementById("historiaCompleta");
-  const btn = event.target;
-  if(div.style.display === "none"){
-    div.style.display = "block";
-    btn.textContent = "📖 Ocultar historia completa";
-  } else {
-    div.style.display = "none";
-    btn.textContent = "📖 Leer la historia completa";
-  }
-};
+window.abrirModal = function(id){ document.getElementById(id).classList.add("active"); };
+window.cerrarModal = function(id){ document.getElementById(id).classList.remove("active"); };
 
-// --- Toast de notificaciones ---
 window.mostrarToast = function(mensaje, tipo){
   const container = document.getElementById("toastContainer");
   const toast = document.createElement("div");
@@ -317,7 +377,6 @@ window.mostrarToast = function(mensaje, tipo){
   setTimeout(() => toast.remove(), 3300);
 };
 
-// --- Timer flotante de reserva activa ---
 function iniciarTimerFlotante(){
   const timerDiv = document.getElementById("timerFlotante");
   const timerTexto = document.getElementById("timerTexto");
@@ -345,7 +404,6 @@ function iniciarTimerFlotante(){
   setInterval(actualizar, 1000);
 }
 
-// Al cargar la página, verificar si ya había una reserva en curso
 const vencimientoGuardado = localStorage.getItem("reservaVencimiento");
 if(vencimientoGuardado && parseInt(vencimientoGuardado) > Date.now()){
   iniciarTimerFlotante();
