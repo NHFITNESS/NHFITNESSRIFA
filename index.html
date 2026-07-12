@@ -59,8 +59,9 @@
   .btn-reservar{background:var(--neutro); color:#fff;}
   .btn-cancelar-sel{background:#c0392b; color:#fff;}
 
-  .timer-flotante{display:none; position:fixed; top:10px; left:50%; transform:translateX(-50%); background:var(--amarillo); color:#6b5900; font-weight:bold; padding:10px 18px; border-radius:30px; box-shadow:0 3px 10px rgba(0,0,0,.25); z-index:950; font-size:13px; text-align:center; max-width:92vw;}
-  .timer-flotante.activo{display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center;}
+  .aviso-flotante{display:none; position:fixed; top:10px; left:50%; transform:translateX(-50%); background:var(--amarillo); color:#6b5900; font-weight:bold; padding:10px 16px; border-radius:30px; box-shadow:0 3px 10px rgba(0,0,0,.25); z-index:950; font-size:13px; text-align:center; max-width:92vw; cursor:pointer;}
+  .aviso-flotante.activo{display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center;}
+  .aviso-flotante .btn-ver{background:#1a1a1a; color:#fff; border:none; padding:6px 12px; border-radius:16px; font-size:12px; cursor:pointer; font-weight:bold;}
 
   .btn-ig-dm{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color:#fff; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:bold; text-decoration:none; white-space:nowrap;}
 
@@ -128,9 +129,9 @@
 
 <div class="precio-banner" id="precioBanner">💵 Valor del número: $5.000</div>
 
-<div class="timer-flotante" id="timerFlotante">
-  <span>⏱ Tenés 15 minutos para transferir al alias <b>nh.rifa</b></span>
-  <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-dm">📩 Enviar comprobante</a>
+<div class="aviso-flotante" id="avisoFlotante" onclick="abrirMiReserva()">
+  <span>⏱ Tenés una reserva pendiente de pago</span>
+  <button type="button" class="btn-ver">Ver instrucciones</button>
 </div>
 
 <div class="botones-info">
@@ -266,7 +267,7 @@
   </div>
 </div>
 
-<!-- Modal: Reserva (rediseñado por pasos) -->
+<!-- Modal: Reserva (paso a paso, al momento de reservar) -->
 <div class="overlay" id="overlayReserva">
   <div class="modal">
     <button class="modal-close-x" onclick="cancelarReserva()">✕</button>
@@ -284,7 +285,7 @@
     <p class="paso-texto">Hacé la transferencia por el monto total al siguiente alias:</p>
     <div class="alias-box">
       <span class="alias-label">Alias</span>
-      <span class="alias-valor" id="aliasTexto">nh.rifa</span><br>
+      <span class="alias-valor">nh.rifa</span><br>
       <button type="button" class="btn-copiar" onclick="copiarAlias()">📋 Copiar alias</button>
     </div>
 
@@ -303,12 +304,49 @@
     </div>
 
     <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
-      ⏱ Tenés <b>15 minutos</b> para transferir. Si el pago no es confirmado por el administrador en ese tiempo, los números se liberan automáticamente.
+      ⏱ Tenés <b>15 minutos</b> para transferir. Si el pago no es confirmado por el administrador en ese tiempo, los números se liberan automáticamente. Podés volver a esta página en cualquier momento y tocar el aviso amarillo de arriba para ver estas instrucciones de nuevo.
     </p>
 
     <div class="modal-buttons">
       <button class="btn-guardar" onclick="confirmarReserva()">Reservar</button>
       <button class="btn-cerrar" onclick="cancelarReserva()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Mi reserva pendiente (se puede reabrir en cualquier momento) -->
+<div class="overlay" id="overlayMiReserva">
+  <div class="modal">
+    <button class="modal-close-x" onclick="cerrarModal('overlayMiReserva')">✕</button>
+    <h3>Tu reserva pendiente</h3>
+
+    <div class="resumen-reserva">
+      <p style="margin:0; font-size:13px; color:#666;">Números reservados:</p>
+      <p class="numeros" id="miReservaNumeros">-</p>
+      <p style="margin:0; font-size:13px; color:#666;">Monto total a transferir:</p>
+      <p class="monto" id="miReservaMonto">$0</p>
+    </div>
+
+    <hr class="paso-divisor">
+    <div class="paso-titulo"><span class="paso-numero">1</span> Transferí el monto</div>
+    <p class="paso-texto">Si todavía no lo hiciste, transferí el monto total al siguiente alias:</p>
+    <div class="alias-box">
+      <span class="alias-label">Alias</span>
+      <span class="alias-valor">nh.rifa</span><br>
+      <button type="button" class="btn-copiar" onclick="copiarAlias()">📋 Copiar alias</button>
+    </div>
+
+    <hr class="paso-divisor">
+    <div class="paso-titulo"><span class="paso-numero">2</span> Enviá el comprobante</div>
+    <p class="paso-texto">Descargá el comprobante de la transferencia y enviánoslo por mensaje directo de Instagram tocando el siguiente botón:</p>
+    <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-directo">📩 Enviar comprobante por Instagram Directo</a>
+
+    <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
+      ⏱ Recordá que tenés 15 minutos desde el momento de la reserva para transferir. Si el administrador no confirma el pago en ese plazo, los números se liberan automáticamente.
+    </p>
+
+    <div class="modal-buttons">
+      <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayMiReserva')">Cerrar</button>
     </div>
   </div>
 </div>
@@ -448,13 +486,14 @@ window.confirmarReserva = async function(){
 
     localStorage.setItem("reservaVencimiento", vencimiento);
     localStorage.setItem("reservaNumeros", JSON.stringify(seleccionados));
-    mostrarAvisoReserva(vencimiento);
+    activarAvisoFlotante(vencimiento);
 
-    seleccionados = [];
     document.getElementById("overlayReserva").classList.remove("active");
     document.getElementById("reservaNombre").value = "";
     document.getElementById("reservaTelefono").value = "";
-    mostrarToast("✅ Números reservados por 15 minutos. Recordá transferir al alias nh.rifa y enviar el comprobante por Instagram.", "exito");
+    mostrarToast("✅ Números reservados por 15 minutos. Podés volver a esta página cuando quieras y tocar el aviso amarillo de arriba para ver de nuevo cómo enviar el comprobante.", "exito");
+
+    seleccionados = [];
   }catch(err){
     mostrarToast("Ocurrió un error al reservar. Intentá de nuevo.", "error");
     console.error(err);
@@ -475,29 +514,40 @@ window.mostrarToast = function(mensaje, tipo){
   setTimeout(() => toast.remove(), 3300);
 };
 
-// Aviso estático (sin cuenta regresiva): se muestra mientras haya una reserva activa
-// y se oculta automáticamente al vencer el plazo de 15 minutos.
-function mostrarAvisoReserva(vencimiento){
-  const timerDiv = document.getElementById("timerFlotante");
+// Aviso flotante persistente: se muestra mientras haya una reserva activa
+// (sobrevive a recargas de página y a volver más tarde, gracias a localStorage).
+// Al tocarlo, reabre el modal "Mi reserva pendiente" con alias + botón de Instagram.
+function activarAvisoFlotante(vencimiento){
+  const aviso = document.getElementById("avisoFlotante");
   const restante = vencimiento - Date.now();
   if(restante <= 0){
-    timerDiv.classList.remove("activo");
+    aviso.classList.remove("activo");
     return;
   }
-  timerDiv.classList.add("activo");
+  aviso.classList.add("activo");
   setTimeout(() => {
     const vencimientoActual = parseInt(localStorage.getItem("reservaVencimiento") || "0");
     if(Date.now() >= vencimientoActual){
-      timerDiv.classList.remove("activo");
+      aviso.classList.remove("activo");
       localStorage.removeItem("reservaVencimiento");
       localStorage.removeItem("reservaNumeros");
     }
   }, restante);
 }
 
+window.abrirMiReserva = function(){
+  const numerosGuardados = JSON.parse(localStorage.getItem("reservaNumeros") || "[]");
+  const monto = numerosGuardados.length * PRECIO_UNITARIO;
+  document.getElementById("miReservaNumeros").textContent = numerosGuardados.length ? numerosGuardados.join(", ") : "-";
+  document.getElementById("miReservaMonto").textContent = "$" + monto.toLocaleString("es-AR");
+  document.getElementById("overlayMiReserva").classList.add("active");
+};
+
+// Al cargar la página, si hay una reserva vigente guardada en este navegador,
+// se reactiva el aviso flotante automáticamente (aunque se haya cerrado el modal o recargado la página).
 const vencimientoGuardado = parseInt(localStorage.getItem("reservaVencimiento") || "0");
 if(vencimientoGuardado && vencimientoGuardado > Date.now()){
-  mostrarAvisoReserva(vencimientoGuardado);
+  activarAvisoFlotante(vencimientoGuardado);
 }
 
 document.getElementById("buscador").addEventListener("input", render);
