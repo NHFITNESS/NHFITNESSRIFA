@@ -26,6 +26,7 @@
   .btn-historia{background:#ffffff; color:var(--negro); border:2px solid var(--negro) !important;}
   .btn-instagram-nav{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);}
   .btn-premios{background:#ffffff; color:var(--negro); border:2px solid var(--negro) !important;}
+  .btn-mis-numeros{background:#ffffff; color:var(--negro); border:2px solid var(--negro) !important;}
   .btn-info:hover{filter:brightness(0.95);}
   .toolbar{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:10px auto; max-width:600px; padding:0 10px;}
   #buscador{flex:1; min-width:200px; padding:10px; border-radius:8px; border:2px solid var(--negro);}
@@ -104,6 +105,15 @@
   .resumen-reserva{background:#f4f4f4; border-radius:8px; padding:12px 14px; margin-bottom:6px;}
   .resumen-reserva .numeros{font-weight:bold; font-size:16px; margin:4px 0;}
   .resumen-reserva .monto{font-weight:bold; font-size:22px; color:var(--neutro-oscuro);}
+
+  .historial-item{display:flex; justify-content:space-between; align-items:center; background:#f9f9f9; border-radius:8px; padding:10px 14px; margin-bottom:8px; font-size:14px;}
+  .historial-item .numero-hist{font-weight:bold; font-size:16px;}
+  .historial-item .fecha-hist{font-size:11px; color:#888; display:block;}
+  .badge-estado{padding:4px 10px; border-radius:12px; font-size:11px; font-weight:bold; white-space:nowrap;}
+  .badge-vendido{background:var(--rojo); color:#5a1f1f;}
+  .badge-reservado{background:var(--amarillo); color:#6b5900;}
+  .badge-liberado{background:#e0e0e0; color:#666;}
+  .historial-vacio{text-align:center; color:#888; font-size:13px; padding:20px 0;}
 </style>
 </head>
 <body>
@@ -141,6 +151,7 @@
     SEGUINOS EN INSTAGRAM
   </button>
   <button class="btn-info btn-premios" onclick="abrirModal('overlayPremios')">🏆 VER PREMIOS</button>
+  <button class="btn-info btn-mis-numeros" onclick="abrirMisNumeros()">🎟 MIS NÚMEROS</button>
 </div>
 
 <p class="instruccion">👉 Tocá los números que querés comprar. Podés elegir más de uno.</p>
@@ -304,7 +315,7 @@
     </div>
 
     <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
-      ⏱ Te pedimos que transfieras dentro de los <b>15 minutos</b>. El administrador revisará tu pago manualmente y confirmará tu número apenas lo reciba — los números reservados no se liberan solos. Podés volver a esta página en cualquier momento y tocar el aviso amarillo de arriba para ver estas instrucciones de nuevo.
+      ⏱ Te pedimos que transfieras dentro de los <b>15 minutos</b>. El administrador revisará tu pago manualmente y confirmará tu número apenas lo reciba — los números reservados no se liberan solos. Podés volver a esta página en cualquier momento y tocar el aviso amarillo de arriba, o el botón "Mis números", para ver estas instrucciones de nuevo.
     </p>
 
     <div class="modal-buttons">
@@ -347,6 +358,21 @@
 
     <div class="modal-buttons">
       <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayMiReserva')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Mis números (historial completo de este dispositivo) -->
+<div class="overlay" id="overlayMisNumeros">
+  <div class="modal">
+    <button class="modal-close-x" onclick="cerrarModal('overlayMisNumeros')">✕</button>
+    <h3>🎟 Mis números</h3>
+    <p style="font-size:13px; color:#666; text-align:center; margin-top:-6px;">
+      Todos los números que reservaste desde este dispositivo, con su estado actual.
+    </p>
+    <div id="listaMisNumeros" style="margin-top:14px;"></div>
+    <div class="modal-buttons">
+      <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayMisNumeros')">Cerrar</button>
     </div>
   </div>
 </div>
@@ -458,6 +484,22 @@ window.copiarAlias = function(){
   });
 };
 
+// Agrega números al historial permanente de este dispositivo (no se borra nunca solo,
+// a diferencia de la reserva activa que sí se limpia cuando se confirma o libera).
+function agregarAlHistorial(idsNuevos, reservaId){
+  const historial = JSON.parse(localStorage.getItem("historialNumeros") || "[]");
+  const fecha = new Date().toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit", year:"numeric" });
+
+  idsNuevos.forEach(numero => {
+    const yaExiste = historial.some(h => h.numero === numero);
+    if(!yaExiste){
+      historial.push({ numero, reservaId, fecha });
+    }
+  });
+
+  localStorage.setItem("historialNumeros", JSON.stringify(historial));
+}
+
 window.confirmarReserva = async function(){
   const nombre = document.getElementById("reservaNombre").value.trim();
   const telefono = document.getElementById("reservaTelefono").value.trim();
@@ -487,6 +529,7 @@ window.confirmarReserva = async function(){
 
     localStorage.setItem("reservaVencimiento", vencimiento);
     localStorage.setItem("reservaNumeros", JSON.stringify(seleccionados));
+    agregarAlHistorial(seleccionados, reservaId);
     activarAvisoFlotante();
 
     document.getElementById("overlayReserva").classList.remove("active");
@@ -534,10 +577,7 @@ window.abrirMiReserva = function(){
   document.getElementById("overlayMiReserva").classList.add("active");
 };
 
-// Revisa en tiempo real (cada vez que llegan datos nuevos de Firestore) el estado
-// de los números que este comprador reservó. Si el administrador ya los confirmó
-// como vendidos, o los liberó/canceló, el aviso de "reserva pendiente" desaparece
-// automáticamente y se le avisa al comprador con un toast, sin que tenga que hacer nada.
+// Revisa en tiempo real el estado de la reserva ACTIVA (la última hecha) de este dispositivo.
 let ultimoEstadoNotificado = null;
 
 function revisarEstadoReservaLocal(){
@@ -548,8 +588,6 @@ function revisarEstadoReservaLocal(){
   if(!numerosGuardados || numerosGuardados.length === 0) return;
 
   const numerosEnBase = numerosGuardados.map(id => numeros.find(n => n.id === id)).filter(Boolean);
-
-  // Si por algún motivo no encontramos los números en la base, no hacemos nada todavía.
   if(numerosEnBase.length === 0) return;
 
   const todosVendidos = numerosEnBase.every(n => n.vendido);
@@ -572,13 +610,56 @@ function revisarEstadoReservaLocal(){
     localStorage.removeItem("reservaVencimiento");
     localStorage.removeItem("reservaNumeros");
   } else {
-    // Todavía sigue reservado (pendiente de aprobación) — mantenemos el aviso visible.
     activarAvisoFlotante();
   }
 }
 
-// Al cargar la página, si hay una reserva guardada en este navegador, se reactiva el aviso flotante
-// (la primera verificación real contra la base la hace revisarEstadoReservaLocal() al llegar el primer snapshot).
+// ===== Historial "Mis números" =====
+// Muestra TODOS los números que este dispositivo reservó alguna vez (histórico),
+// con su estado actual calculado en vivo contra la base de datos.
+window.abrirMisNumeros = function(){
+  const historial = JSON.parse(localStorage.getItem("historialNumeros") || "[]");
+  const contenedor = document.getElementById("listaMisNumeros");
+
+  if(historial.length === 0){
+    contenedor.innerHTML = "<p class='historial-vacio'>Todavía no reservaste ningún número desde este dispositivo.</p>";
+    document.getElementById("overlayMisNumeros").classList.add("active");
+    return;
+  }
+
+  // Orden: más reciente primero
+  const historialOrdenado = [...historial].reverse();
+
+  contenedor.innerHTML = historialOrdenado.map(item => {
+    const nActual = numeros.find(n => n.id === item.numero);
+    let badgeClase = "badge-liberado";
+    let badgeTexto = "⚪ Liberado";
+
+    if(nActual){
+      if(nActual.vendido){
+        badgeClase = "badge-vendido";
+        badgeTexto = "🔴 Confirmado";
+      } else if(nActual.reservado){
+        badgeClase = "badge-reservado";
+        badgeTexto = "🟡 Pendiente de aprobación";
+      }
+    }
+
+    return `
+      <div class="historial-item">
+        <div>
+          <span class="numero-hist">Nº ${item.numero}</span>
+          <span class="fecha-hist">Reservado el ${item.fecha}</span>
+        </div>
+        <span class="badge-estado ${badgeClase}">${badgeTexto}</span>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("overlayMisNumeros").classList.add("active");
+};
+
+// Al cargar la página, si hay una reserva guardada en este navegador, se reactiva el aviso flotante.
 const numerosGuardadosInicio = localStorage.getItem("reservaNumeros");
 if(numerosGuardadosInicio && JSON.parse(numerosGuardadosInicio).length > 0){
   activarAvisoFlotante();
