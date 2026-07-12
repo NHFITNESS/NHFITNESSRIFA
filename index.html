@@ -97,7 +97,7 @@
   .paso-numero{background:var(--neutro); color:#fff; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;}
   .paso-divisor{border:none; border-top:1px solid #eee; margin:14px 0 0 0;}
   .paso-texto{font-size:13px; color:#555; margin:4px 0 10px 30px;}
-  .alias-box{background:#fff8e1; border:2px dashed #b8860b; border-radius:8px; padding:12px; text-align:center; margin:6px 0 0 30px;}
+  .alias-box{background:#fff8e1; border:2px solid #b8860b; border-radius:8px; padding:12px; text-align:center; margin:6px 0 0 30px;}
   .alias-box .alias-label{font-size:12px; color:#7a5c00; display:block; margin-bottom:2px;}
   .alias-box .alias-valor{font-size:20px; font-weight:bold; color:#7a5c00; letter-spacing:.5px;}
   .btn-copiar{background:none; border:1px solid #b8860b; color:#7a5c00; font-size:11px; padding:3px 10px; border-radius:12px; cursor:pointer; margin-top:6px;}
@@ -110,6 +110,8 @@
 
   .btn-whatsapp{width:calc(100% - 30px); margin-left:30px; padding:11px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:#fff; background:#25D366; display:block; text-align:center; text-decoration:none; font-size:13px; margin-top:8px;}
   .whatsapp-hint{font-size:11px; color:#888; margin:4px 0 0 30px;}
+
+  .datos-personales{margin-left:30px;}
 
   .historial-item{display:flex; justify-content:space-between; align-items:center; background:#f9f9f9; border-radius:8px; padding:10px 14px; margin-bottom:8px; font-size:14px;}
   .historial-item .numero-hist{font-weight:bold; font-size:16px;}
@@ -283,12 +285,13 @@
   </div>
 </div>
 
-<!-- Modal: Reserva (paso a paso, al momento de reservar) -->
+<!-- Modal: Reserva (NUEVO ORDEN: 1-Números 2-Datos 3-Transferencia 4-Comprobante 5-WhatsApp) -->
 <div class="overlay" id="overlayReserva">
   <div class="modal">
     <button class="modal-close-x" onclick="cancelarReserva()">✕</button>
     <h3>Confirmar selección</h3>
 
+    <!-- 1. Números elegidos -->
     <div class="resumen-reserva">
       <p style="margin:0; font-size:13px; color:#666;">Números elegidos:</p>
       <div class="numeros-badges" id="listaSeleccionados"></div>
@@ -296,8 +299,20 @@
       <p class="monto" id="montoTotal">$0</p>
     </div>
 
+    <!-- 2. Datos personales -->
     <hr class="paso-divisor">
-    <div class="paso-titulo"><span class="paso-numero">1</span> Transferí el monto</div>
+    <div class="paso-titulo"><span class="paso-numero">1</span> Completá tus datos</div>
+    <div class="datos-personales">
+      <label>Nombre y apellido</label>
+      <input type="text" id="reservaNombre" placeholder="Ej: Juan Pérez">
+      <label>Teléfono (WhatsApp)</label>
+      <input type="text" id="reservaTelefono" placeholder="Ej: 11 2345 6789 (sin 0 ni 15)">
+      <p class="whatsapp-hint" style="margin-left:0;">Escribí tu número sin el 0 de característica ni el 15 (Ej: si tu número es 011 15-2345-6789, escribí 1123456789).</p>
+    </div>
+
+    <!-- 3. Transferencia -->
+    <hr class="paso-divisor">
+    <div class="paso-titulo"><span class="paso-numero">2</span> Transferí el monto</div>
     <p class="paso-texto">Hacé la transferencia por el monto total al siguiente alias:</p>
     <div class="alias-box">
       <span class="alias-label">Alias</span>
@@ -305,21 +320,15 @@
       <button type="button" class="btn-copiar" onclick="copiarAlias()">📋 Copiar alias</button>
     </div>
 
+    <!-- 4. Comprobante por Instagram -->
     <hr class="paso-divisor">
-    <div class="paso-titulo"><span class="paso-numero">2</span> Enviá el comprobante</div>
+    <div class="paso-titulo"><span class="paso-numero">3</span> Enviá el comprobante</div>
     <p class="paso-texto">Una vez realizada la transferencia, descargá el comprobante y enviánoslo por mensaje directo de Instagram tocando el siguiente botón:</p>
     <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-directo">📩 Enviar comprobante por Instagram Directo</a>
 
+    <!-- 5. Resumen por WhatsApp -->
     <hr class="paso-divisor">
-    <div class="paso-titulo"><span class="paso-numero">3</span> Completá tus datos</div>
-    <div style="margin-left:30px;">
-      <label>Nombre y apellido</label>
-      <input type="text" id="reservaNombre" placeholder="Ej: Juan Pérez">
-      <label>Teléfono (WhatsApp)</label>
-      <input type="text" id="reservaTelefono" placeholder="Ej: 11 2345 6789 (sin 0 ni 15)">
-    </div>
-    <a href="#" id="btnWhatsappReserva" class="btn-whatsapp" target="_blank" onclick="return prepararWhatsapp('reserva')">📲 Enviarme este resumen por WhatsApp</a>
-    <p class="whatsapp-hint">Escribí tu número sin el 0 de característica ni el 15 (Ej: si tu número es 011 15-2345-6789, escribí 1123456789).</p>
+    <a href="#" id="btnWhatsappReserva" class="btn-whatsapp" style="margin-left:0; width:100%; margin-top:12px;" target="_blank" onclick="return prepararWhatsapp('reserva')">📲 Enviarme este resumen por WhatsApp</a>
 
     <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
       ⏱ Te pedimos que transfieras dentro de los <b>15 minutos</b>. El administrador revisará tu pago manualmente y confirmará tu número apenas lo reciba — los números reservados no se liberan solos. Podés volver a esta página en cualquier momento y tocar el aviso amarillo de arriba, o el botón "Mis números", para ver estas instrucciones de nuevo.
@@ -332,7 +341,7 @@
   </div>
 </div>
 
-<!-- Modal: Mi reserva pendiente (se puede reabrir en cualquier momento) -->
+<!-- Modal: Mi reserva pendiente (mismo orden aplicado, sin el paso de datos ya que ya fueron cargados) -->
 <div class="overlay" id="overlayMiReserva">
   <div class="modal">
     <button class="modal-close-x" onclick="cerrarModal('overlayMiReserva')">✕</button>
@@ -358,7 +367,9 @@
     <div class="paso-titulo"><span class="paso-numero">2</span> Enviá el comprobante</div>
     <p class="paso-texto">Descargá el comprobante de la transferencia y enviánoslo por mensaje directo de Instagram tocando el siguiente botón:</p>
     <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-directo">📩 Enviar comprobante por Instagram Directo</a>
-    <a href="#" id="btnWhatsappMiReserva" class="btn-whatsapp" target="_blank" onclick="return prepararWhatsapp('miReserva')">📲 Enviarme este resumen por WhatsApp</a>
+
+    <hr class="paso-divisor">
+    <a href="#" id="btnWhatsappMiReserva" class="btn-whatsapp" style="margin-left:0; width:100%; margin-top:12px;" target="_blank" onclick="return prepararWhatsapp('miReserva')">📲 Enviarme este resumen por WhatsApp</a>
 
     <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
       ⏱ Te pedimos que transfieras dentro de los 15 minutos desde la reserva. El administrador confirmará tu pago manualmente apenas lo reciba — tu número queda a tu nombre hasta que el administrador lo revise.
@@ -498,18 +509,12 @@ window.copiarAlias = function(){
   });
 };
 
-// Convierte un teléfono argentino a formato internacional para WhatsApp.
-// Reglas de Argentina: 54 (país) + 9 (indicador celular) + código de área (sin 0) + número (sin 15).
 function formatearTelefonoWhatsapp(telefono){
   let limpio = telefono.replace(/[^\d]/g, "");
 
-  // Sacar el 0 inicial de la característica, si está.
   if(limpio.startsWith("0")) limpio = limpio.substring(1);
-
-  // Sacar el "15" si aparece justo después de un código de área de 2 a 4 dígitos.
   limpio = limpio.replace(/^(\d{2,4})15(\d+)$/, "$1$2");
 
-  // Anteponer 54 9 si todavía no están.
   if(limpio.startsWith("549")){
     // ya está completo
   } else if(limpio.startsWith("54")){
