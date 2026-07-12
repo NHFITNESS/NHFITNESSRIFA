@@ -74,13 +74,26 @@
   @keyframes toastIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
   @keyframes toastOut{from{opacity:1;} to{opacity:0;}}
 
-  .premio-item{display:flex; justify-content:space-between; align-items:center; background:#f9f9f9; border-radius:8px; padding:12px 14px; margin-bottom:10px; border-left:5px solid var(--neutro);}
+  .premio-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#f9f9f9;
+    border-radius:8px;
+    padding:14px 16px;
+    margin-bottom:10px;
+    border-left:5px solid var(--neutro);
+    gap:12px;
+    min-height:52px;
+    box-shadow:0 1px 4px rgba(0,0,0,.06);
+  }
   .premio-item.primero{border-left-color:#f1c40f;}
   .premio-item.segundo{border-left-color:#bdc3c7;}
   .premio-item.tercero{border-left-color:#cd7f32;}
-  .premio-item .lugar{font-weight:bold; color:var(--negro);}
-  .premio-item .valor{font-weight:bold; color:var(--neutro-oscuro); font-size:15px;}
-  .sorteo-info{background:#eef3fb; border-left:5px solid #34495e; border-radius:8px; padding:12px 14px; margin-top:16px; font-size:13px; color:#2c3e50; line-height:1.5;}
+  .premio-item.cuarto{border-left-color:var(--naranja);}
+  .premio-item .lugar{font-weight:bold; color:var(--negro); white-space:nowrap; flex-shrink:0;}
+  .premio-item .valor{font-weight:bold; color:var(--naranja); font-size:15px; text-align:right;}
+  .sorteo-info{background:#eef3fb; border-left:5px solid #34495e; border-radius:8px; padding:12px 14px; margin-top:22px; font-size:13px; color:#2c3e50; line-height:1.5;}
   .sorteo-info h4{margin:0 0 8px 0; font-size:14px; color:#1a1a1a;}
 
   .modal-close-x{position:absolute; top:10px; right:12px; background:none; border:none; font-size:22px; line-height:1; color:#999; cursor:pointer; padding:4px 8px; border-radius:50%; transition:background .2s;}
@@ -265,10 +278,9 @@
       <span class="lugar">🥉 Tercer premio</span>
       <span class="valor">$100.000</span>
     </div>
-    <div class="premio-item">
-      <span class="lugar">🎁 Cuarto premio</span>
-      <span class="valor">Parlante JBL 
-        Go Essential</span>
+    <div class="premio-item cuarto">
+      <span class="lugar">🎁 4to premio</span>
+      <span class="valor">Parlante JBL Go Essential</span>
     </div>
 
     <div class="sorteo-info">
@@ -285,13 +297,12 @@
   </div>
 </div>
 
-<!-- Modal: Reserva (NUEVO ORDEN: 1-Números 2-Datos 3-Transferencia 4-Comprobante 5-WhatsApp) -->
+<!-- Modal: Reserva (1-Números 2-Datos 3-Transferencia 4-Comprobante 5-WhatsApp) -->
 <div class="overlay" id="overlayReserva">
   <div class="modal">
     <button class="modal-close-x" onclick="cancelarReserva()">✕</button>
     <h3>Confirmar selección</h3>
 
-    <!-- 1. Números elegidos -->
     <div class="resumen-reserva">
       <p style="margin:0; font-size:13px; color:#666;">Números elegidos:</p>
       <div class="numeros-badges" id="listaSeleccionados"></div>
@@ -299,7 +310,6 @@
       <p class="monto" id="montoTotal">$0</p>
     </div>
 
-    <!-- 2. Datos personales -->
     <hr class="paso-divisor">
     <div class="paso-titulo"><span class="paso-numero">1</span> Completá tus datos</div>
     <div class="datos-personales">
@@ -310,7 +320,6 @@
       <p class="whatsapp-hint" style="margin-left:0;">Escribí tu número sin el 0 de característica ni el 15 (Ej: si tu número es 011 15-2345-6789, escribí 1123456789).</p>
     </div>
 
-    <!-- 3. Transferencia -->
     <hr class="paso-divisor">
     <div class="paso-titulo"><span class="paso-numero">2</span> Transferí el monto</div>
     <p class="paso-texto">Hacé la transferencia por el monto total al siguiente alias:</p>
@@ -320,13 +329,11 @@
       <button type="button" class="btn-copiar" onclick="copiarAlias()">📋 Copiar alias</button>
     </div>
 
-    <!-- 4. Comprobante por Instagram -->
     <hr class="paso-divisor">
     <div class="paso-titulo"><span class="paso-numero">3</span> Enviá el comprobante</div>
     <p class="paso-texto">Una vez realizada la transferencia, descargá el comprobante y enviánoslo por mensaje directo de Instagram tocando el siguiente botón:</p>
     <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-directo">📩 Enviar comprobante por Instagram Directo</a>
 
-    <!-- 5. Resumen por WhatsApp -->
     <hr class="paso-divisor">
     <a href="#" id="btnWhatsappReserva" class="btn-whatsapp" style="margin-left:0; width:100%; margin-top:12px;" target="_blank" onclick="return prepararWhatsapp('reserva')">📲 Enviarme este resumen por WhatsApp</a>
 
@@ -341,7 +348,7 @@
   </div>
 </div>
 
-<!-- Modal: Mi reserva pendiente (mismo orden aplicado, sin el paso de datos ya que ya fueron cargados) -->
+<!-- Modal: Mi reserva pendiente -->
 <div class="overlay" id="overlayMiReserva">
   <div class="modal">
     <button class="modal-close-x" onclick="cerrarModal('overlayMiReserva')">✕</button>
@@ -381,7 +388,7 @@
   </div>
 </div>
 
-<!-- Modal: Mis números (historial completo de este dispositivo) -->
+<!-- Modal: Mis números -->
 <div class="overlay" id="overlayMisNumeros">
   <div class="modal">
     <button class="modal-close-x" onclick="cerrarModal('overlayMisNumeros')">✕</button>
