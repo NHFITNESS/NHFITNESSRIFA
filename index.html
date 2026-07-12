@@ -58,7 +58,6 @@
   .barra-seleccion button{border:none; padding:10px 16px; border-radius:8px; font-weight:bold; cursor:pointer;}
   .btn-reservar{background:var(--neutro); color:#fff;}
   .btn-cancelar-sel{background:#c0392b; color:#fff;}
-  .alias-box{background:#fff8e1; border:2px dashed #b8860b; border-radius:8px; padding:10px; text-align:center; font-size:18px; font-weight:bold; color:#7a5c00; margin:10px 0;}
 
   .timer-flotante{display:none; position:fixed; top:10px; left:50%; transform:translateX(-50%); background:var(--amarillo); color:#6b5900; font-weight:bold; padding:10px 18px; border-radius:30px; box-shadow:0 3px 10px rgba(0,0,0,.25); z-index:950; font-size:13px; text-align:center; max-width:92vw;}
   .timer-flotante.activo{display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center;}
@@ -91,6 +90,19 @@
   .historia-parrafo{font-size:14px; color:#333; line-height:1.6; margin-bottom:14px;}
   .historia-destacado{background:#f2f2f2; border-left:4px solid var(--neutro); padding:10px 14px; border-radius:6px; font-style:italic; color:#4a4a4a; margin:16px 0; font-size:14px;}
   .historia-divisor{border:none; border-top:1px solid #eee; margin:16px 0;}
+
+  .paso-titulo{display:flex; align-items:center; gap:8px; font-weight:bold; font-size:14px; color:var(--negro); margin-top:16px;}
+  .paso-numero{background:var(--neutro); color:#fff; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;}
+  .paso-divisor{border:none; border-top:1px solid #eee; margin:14px 0 0 0;}
+  .paso-texto{font-size:13px; color:#555; margin:4px 0 10px 30px;}
+  .alias-box{background:#fff8e1; border:2px dashed #b8860b; border-radius:8px; padding:12px; text-align:center; margin:6px 0 0 30px;}
+  .alias-box .alias-label{font-size:12px; color:#7a5c00; display:block; margin-bottom:2px;}
+  .alias-box .alias-valor{font-size:20px; font-weight:bold; color:#7a5c00; letter-spacing:.5px;}
+  .btn-copiar{background:none; border:1px solid #b8860b; color:#7a5c00; font-size:11px; padding:3px 10px; border-radius:12px; cursor:pointer; margin-top:6px;}
+  .btn-ig-directo{width:calc(100% - 30px); margin-left:30px; padding:12px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:#fff; background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); display:block; text-align:center; text-decoration:none; font-size:13px;}
+  .resumen-reserva{background:#f4f4f4; border-radius:8px; padding:12px 14px; margin-bottom:6px;}
+  .resumen-reserva .numeros{font-weight:bold; font-size:16px; margin:4px 0;}
+  .resumen-reserva .monto{font-weight:bold; font-size:22px; color:var(--neutro-oscuro);}
 </style>
 </head>
 <body>
@@ -117,7 +129,7 @@
 <div class="precio-banner" id="precioBanner">💵 Valor del número: $5.000</div>
 
 <div class="timer-flotante" id="timerFlotante">
-  <span>⏱ Tenés 15 minutos para transferir al alias <b>NH.rifa</b></span>
+  <span>⏱ Tenés 15 minutos para transferir al alias <b>nh.rifa</b></span>
   <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-dm">📩 Enviar comprobante</a>
 </div>
 
@@ -254,25 +266,46 @@
   </div>
 </div>
 
+<!-- Modal: Reserva (rediseñado por pasos) -->
 <div class="overlay" id="overlayReserva">
   <div class="modal">
     <button class="modal-close-x" onclick="cancelarReserva()">✕</button>
     <h3>Confirmar selección</h3>
-    <p style="font-size:14px;">Números elegidos:</p>
-    <p style="font-weight:bold; font-size:16px;" id="listaSeleccionados"></p>
-    <p style="font-size:14px;">Monto total a transferir:</p>
-    <p style="font-weight:bold; font-size:20px; color:var(--neutro-oscuro);" id="montoTotal">$0</p>
-    <div class="alias-box">Alias: NH.rifa</div>
-    <a href="https://ig.me/m/nh.fitnes" target="_blank" style="text-decoration:none;">
-      <button type="button" class="btn-instagram-nav" style="width:100%; padding:10px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:#fff; margin-bottom:6px;">📩 Enviar comprobante por Instagram Directo</button>
-    </a>
-    <label>Nombre y apellido</label>
-    <input type="text" id="reservaNombre" placeholder="Ej: Juan Pérez">
-    <label>Teléfono</label>
-    <input type="text" id="reservaTelefono" placeholder="Ej: 099123456">
-    <p style="font-size:12px; color:#888; margin-top:10px;">
+
+    <div class="resumen-reserva">
+      <p style="margin:0; font-size:13px; color:#666;">Números elegidos:</p>
+      <p class="numeros" id="listaSeleccionados"></p>
+      <p style="margin:0; font-size:13px; color:#666;">Monto total a transferir:</p>
+      <p class="monto" id="montoTotal">$0</p>
+    </div>
+
+    <hr class="paso-divisor">
+    <div class="paso-titulo"><span class="paso-numero">1</span> Transferí el monto</div>
+    <p class="paso-texto">Hacé la transferencia por el monto total al siguiente alias:</p>
+    <div class="alias-box">
+      <span class="alias-label">Alias</span>
+      <span class="alias-valor" id="aliasTexto">nh.rifa</span><br>
+      <button type="button" class="btn-copiar" onclick="copiarAlias()">📋 Copiar alias</button>
+    </div>
+
+    <hr class="paso-divisor">
+    <div class="paso-titulo"><span class="paso-numero">2</span> Enviá el comprobante</div>
+    <p class="paso-texto">Una vez realizada la transferencia, descargá el comprobante y enviánoslo por mensaje directo de Instagram tocando el siguiente botón:</p>
+    <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-directo">📩 Enviar comprobante por Instagram Directo</a>
+
+    <hr class="paso-divisor">
+    <div class="paso-titulo"><span class="paso-numero">3</span> Completá tus datos</div>
+    <div style="margin-left:30px;">
+      <label>Nombre y apellido</label>
+      <input type="text" id="reservaNombre" placeholder="Ej: Juan Pérez">
+      <label>Teléfono</label>
+      <input type="text" id="reservaTelefono" placeholder="Ej: 099123456">
+    </div>
+
+    <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
       ⏱ Tenés <b>15 minutos</b> para transferir. Si el pago no es confirmado por el administrador en ese tiempo, los números se liberan automáticamente.
     </p>
+
     <div class="modal-buttons">
       <button class="btn-guardar" onclick="confirmarReserva()">Reservar</button>
       <button class="btn-cerrar" onclick="cancelarReserva()">Cancelar</button>
@@ -378,6 +411,14 @@ window.cancelarReserva = function(){
   document.getElementById("overlayReserva").classList.remove("active");
 };
 
+window.copiarAlias = function(){
+  navigator.clipboard.writeText("nh.rifa").then(()=>{
+    mostrarToast("✅ Alias copiado al portapapeles", "exito");
+  }).catch(()=>{
+    mostrarToast("No se pudo copiar. Copialo manualmente: nh.rifa", "info");
+  });
+};
+
 window.confirmarReserva = async function(){
   const nombre = document.getElementById("reservaNombre").value.trim();
   const telefono = document.getElementById("reservaTelefono").value.trim();
@@ -413,7 +454,7 @@ window.confirmarReserva = async function(){
     document.getElementById("overlayReserva").classList.remove("active");
     document.getElementById("reservaNombre").value = "";
     document.getElementById("reservaTelefono").value = "";
-    mostrarToast("✅ Números reservados por 15 minutos. Recordá transferir al alias NH.rifa y enviar el comprobante por Instagram.", "exito");
+    mostrarToast("✅ Números reservados por 15 minutos. Recordá transferir al alias nh.rifa y enviar el comprobante por Instagram.", "exito");
   }catch(err){
     mostrarToast("Ocurrió un error al reservar. Intentá de nuevo.", "error");
     console.error(err);
