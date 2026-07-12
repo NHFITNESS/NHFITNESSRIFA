@@ -103,8 +103,13 @@
   .btn-copiar{background:none; border:1px solid #b8860b; color:#7a5c00; font-size:11px; padding:3px 10px; border-radius:12px; cursor:pointer; margin-top:6px;}
   .btn-ig-directo{width:calc(100% - 30px); margin-left:30px; padding:12px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:#fff; background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); display:block; text-align:center; text-decoration:none; font-size:13px;}
   .resumen-reserva{background:#f4f4f4; border-radius:8px; padding:12px 14px; margin-bottom:6px;}
-  .resumen-reserva .numeros{font-weight:bold; font-size:16px; margin:4px 0;}
-  .resumen-reserva .monto{font-weight:bold; font-size:22px; color:var(--neutro-oscuro);}
+  .resumen-reserva .monto{font-weight:bold; font-size:22px; color:var(--neutro-oscuro); margin-top:6px;}
+
+  .numeros-badges{display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 10px 0;}
+  .numero-badge{background:var(--verde); color:#1a1a1a; font-weight:bold; font-size:14px; border-radius:8px; padding:8px 0; width:46px; text-align:center; border:2px solid rgba(0,0,0,.1);}
+
+  .btn-whatsapp{width:calc(100% - 30px); margin-left:30px; padding:11px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:#fff; background:#25D366; display:block; text-align:center; text-decoration:none; font-size:13px; margin-top:8px;}
+  .whatsapp-hint{font-size:11px; color:#888; margin:4px 0 0 30px;}
 
   .historial-item{display:flex; justify-content:space-between; align-items:center; background:#f9f9f9; border-radius:8px; padding:10px 14px; margin-bottom:8px; font-size:14px;}
   .historial-item .numero-hist{font-weight:bold; font-size:16px;}
@@ -286,7 +291,7 @@
 
     <div class="resumen-reserva">
       <p style="margin:0; font-size:13px; color:#666;">Números elegidos:</p>
-      <p class="numeros" id="listaSeleccionados"></p>
+      <div class="numeros-badges" id="listaSeleccionados"></div>
       <p style="margin:0; font-size:13px; color:#666;">Monto total a transferir:</p>
       <p class="monto" id="montoTotal">$0</p>
     </div>
@@ -310,9 +315,11 @@
     <div style="margin-left:30px;">
       <label>Nombre y apellido</label>
       <input type="text" id="reservaNombre" placeholder="Ej: Juan Pérez">
-      <label>Teléfono</label>
-      <input type="text" id="reservaTelefono" placeholder="Ej: 099123456">
+      <label>Teléfono (WhatsApp)</label>
+      <input type="text" id="reservaTelefono" placeholder="Ej: 11 2345 6789 (sin 0 ni 15)">
     </div>
+    <a href="#" id="btnWhatsappReserva" class="btn-whatsapp" target="_blank" onclick="return prepararWhatsapp('reserva')">📲 Enviarme este resumen por WhatsApp</a>
+    <p class="whatsapp-hint">Escribí tu número sin el 0 de característica ni el 15 (Ej: si tu número es 011 15-2345-6789, escribí 1123456789).</p>
 
     <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
       ⏱ Te pedimos que transfieras dentro de los <b>15 minutos</b>. El administrador revisará tu pago manualmente y confirmará tu número apenas lo reciba — los números reservados no se liberan solos. Podés volver a esta página en cualquier momento y tocar el aviso amarillo de arriba, o el botón "Mis números", para ver estas instrucciones de nuevo.
@@ -333,7 +340,7 @@
 
     <div class="resumen-reserva">
       <p style="margin:0; font-size:13px; color:#666;">Números reservados:</p>
-      <p class="numeros" id="miReservaNumeros">-</p>
+      <div class="numeros-badges" id="miReservaNumeros"></div>
       <p style="margin:0; font-size:13px; color:#666;">Monto total a transferir:</p>
       <p class="monto" id="miReservaMonto">$0</p>
     </div>
@@ -351,6 +358,7 @@
     <div class="paso-titulo"><span class="paso-numero">2</span> Enviá el comprobante</div>
     <p class="paso-texto">Descargá el comprobante de la transferencia y enviánoslo por mensaje directo de Instagram tocando el siguiente botón:</p>
     <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-directo">📩 Enviar comprobante por Instagram Directo</a>
+    <a href="#" id="btnWhatsappMiReserva" class="btn-whatsapp" target="_blank" onclick="return prepararWhatsapp('miReserva')">📲 Enviarme este resumen por WhatsApp</a>
 
     <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
       ⏱ Te pedimos que transfieras dentro de los 15 minutos desde la reserva. El administrador confirmará tu pago manualmente apenas lo reciba — tu número queda a tu nombre hasta que el administrador lo revise.
@@ -399,6 +407,7 @@ const db = getFirestore(app);
 
 const PRECIO_UNITARIO = 5000;
 const MINUTOS_RESERVA = 15;
+const FECHA_SORTEO_TEXTO = "viernes 21 de agosto (Lotería Nacional - Sorteo Nocturno)";
 
 let numeros = [];
 let seleccionados = [];
@@ -463,11 +472,16 @@ function actualizarBarraSeleccion(){
   }
 }
 
+function renderBadges(containerId, listaNumeros){
+  const cont = document.getElementById(containerId);
+  cont.innerHTML = listaNumeros.map(n => `<div class="numero-badge">${n}</div>`).join("");
+}
+
 window.cancelarSeleccion = function(){ seleccionados = []; render(); };
 
 window.abrirReserva = function(){
   if(seleccionados.length===0) return;
-  document.getElementById("listaSeleccionados").textContent = seleccionados.join(", ");
+  renderBadges("listaSeleccionados", seleccionados);
   document.getElementById("montoTotal").textContent = "$" + (seleccionados.length*PRECIO_UNITARIO).toLocaleString("es-AR");
   document.getElementById("overlayReserva").classList.add("active");
 };
@@ -484,8 +498,68 @@ window.copiarAlias = function(){
   });
 };
 
-// Agrega números al historial permanente de este dispositivo (no se borra nunca solo,
-// a diferencia de la reserva activa que sí se limpia cuando se confirma o libera).
+// Convierte un teléfono argentino a formato internacional para WhatsApp.
+// Reglas de Argentina: 54 (país) + 9 (indicador celular) + código de área (sin 0) + número (sin 15).
+function formatearTelefonoWhatsapp(telefono){
+  let limpio = telefono.replace(/[^\d]/g, "");
+
+  // Sacar el 0 inicial de la característica, si está.
+  if(limpio.startsWith("0")) limpio = limpio.substring(1);
+
+  // Sacar el "15" si aparece justo después de un código de área de 2 a 4 dígitos.
+  limpio = limpio.replace(/^(\d{2,4})15(\d+)$/, "$1$2");
+
+  // Anteponer 54 9 si todavía no están.
+  if(limpio.startsWith("549")){
+    // ya está completo
+  } else if(limpio.startsWith("54")){
+    limpio = "549" + limpio.substring(2);
+  } else {
+    limpio = "549" + limpio;
+  }
+
+  return limpio;
+}
+
+function construirMensajeWhatsapp(listaNumeros, monto){
+  return `🎟 *Rifa NH-Fitness*\n\n`
+    + `Números reservados: ${listaNumeros.join(", ")}\n`
+    + `Monto a transferir: $${monto.toLocaleString("es-AR")}\n`
+    + `Alias para transferir: nh.rifa\n\n`
+    + `📅 Fecha del sorteo: ${FECHA_SORTEO_TEXTO}\n\n`
+    + `📩 Recordá enviar el comprobante por Instagram: https://ig.me/m/nh.fitnes`;
+}
+
+window.prepararWhatsapp = function(origen){
+  let telefono, listaNumeros, monto;
+
+  if(origen === "reserva"){
+    telefono = document.getElementById("reservaTelefono").value.trim();
+    listaNumeros = seleccionados;
+    monto = seleccionados.length * PRECIO_UNITARIO;
+  } else {
+    telefono = localStorage.getItem("reservaTelefono") || "";
+    listaNumeros = JSON.parse(localStorage.getItem("reservaNumeros") || "[]");
+    monto = listaNumeros.length * PRECIO_UNITARIO;
+  }
+
+  if(!telefono){
+    mostrarToast("Completá primero tu número de teléfono para poder enviarte el resumen.", "error");
+    return false;
+  }
+  if(listaNumeros.length === 0){
+    mostrarToast("No hay números para incluir en el resumen.", "error");
+    return false;
+  }
+
+  const telWhatsapp = formatearTelefonoWhatsapp(telefono);
+  const mensaje = encodeURIComponent(construirMensajeWhatsapp(listaNumeros, monto));
+  const url = `https://wa.me/${telWhatsapp}?text=${mensaje}`;
+
+  window.open(url, "_blank");
+  return false;
+};
+
 function agregarAlHistorial(idsNuevos, reservaId){
   const historial = JSON.parse(localStorage.getItem("historialNumeros") || "[]");
   const fecha = new Date().toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit", year:"numeric" });
@@ -529,6 +603,7 @@ window.confirmarReserva = async function(){
 
     localStorage.setItem("reservaVencimiento", vencimiento);
     localStorage.setItem("reservaNumeros", JSON.stringify(seleccionados));
+    localStorage.setItem("reservaTelefono", telefono);
     agregarAlHistorial(seleccionados, reservaId);
     activarAvisoFlotante();
 
@@ -572,12 +647,11 @@ function desactivarAvisoFlotante(){
 window.abrirMiReserva = function(){
   const numerosGuardados = JSON.parse(localStorage.getItem("reservaNumeros") || "[]");
   const monto = numerosGuardados.length * PRECIO_UNITARIO;
-  document.getElementById("miReservaNumeros").textContent = numerosGuardados.length ? numerosGuardados.join(", ") : "-";
+  renderBadges("miReservaNumeros", numerosGuardados);
   document.getElementById("miReservaMonto").textContent = "$" + monto.toLocaleString("es-AR");
   document.getElementById("overlayMiReserva").classList.add("active");
 };
 
-// Revisa en tiempo real el estado de la reserva ACTIVA (la última hecha) de este dispositivo.
 let ultimoEstadoNotificado = null;
 
 function revisarEstadoReservaLocal(){
@@ -601,6 +675,7 @@ function revisarEstadoReservaLocal(){
     desactivarAvisoFlotante();
     localStorage.removeItem("reservaVencimiento");
     localStorage.removeItem("reservaNumeros");
+    localStorage.removeItem("reservaTelefono");
   } else if(ningunoReservadoNiVendido){
     if(ultimoEstadoNotificado !== "liberado"){
       mostrarToast("⚠ Tu reserva fue liberada por el administrador. Si ya transferiste, escribinos por Instagram.", "info");
@@ -609,14 +684,12 @@ function revisarEstadoReservaLocal(){
     desactivarAvisoFlotante();
     localStorage.removeItem("reservaVencimiento");
     localStorage.removeItem("reservaNumeros");
+    localStorage.removeItem("reservaTelefono");
   } else {
     activarAvisoFlotante();
   }
 }
 
-// ===== Historial "Mis números" =====
-// Muestra TODOS los números que este dispositivo reservó alguna vez (histórico),
-// con su estado actual calculado en vivo contra la base de datos.
 window.abrirMisNumeros = function(){
   const historial = JSON.parse(localStorage.getItem("historialNumeros") || "[]");
   const contenedor = document.getElementById("listaMisNumeros");
@@ -627,7 +700,6 @@ window.abrirMisNumeros = function(){
     return;
   }
 
-  // Orden: más reciente primero
   const historialOrdenado = [...historial].reverse();
 
   contenedor.innerHTML = historialOrdenado.map(item => {
@@ -659,7 +731,6 @@ window.abrirMisNumeros = function(){
   document.getElementById("overlayMisNumeros").classList.add("active");
 };
 
-// Al cargar la página, si hay una reserva guardada en este navegador, se reactiva el aviso flotante.
 const numerosGuardadosInicio = localStorage.getItem("reservaNumeros");
 if(numerosGuardadosInicio && JSON.parse(numerosGuardadosInicio).length > 0){
   activarAvisoFlotante();
