@@ -1,0 +1,755 @@
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rifa NH-Fitness</title>
+<style>
+  :root{
+    --naranja:#f7941e;
+    --neutro:#4a5568;
+    --neutro-oscuro:#374151;
+    --negro:#1a1a1a;
+    --verde:#8fd6ab;
+    --rojo:#e79a9a;
+    --amarillo:#f5dd8a;
+    --azul:#8fc1e3;
+  }
+  *{box-sizing:border-box; font-family:'Segoe UI',Arial,sans-serif;}
+  body{margin:0; background:#ffffff; padding-bottom:90px;}
+  header{background:var(--negro); color:#fff; text-align:center; padding:15px; display:flex; flex-direction:column; align-items:center; gap:8px;}
+  header img{max-width:110px; border-radius:10px;}
+  header h2{margin:5px 0 0 0; color:var(--naranja);}
+  .precio-banner{background:#ffffff; color:var(--negro); text-align:center; font-weight:bold; padding:8px; font-size:16px; border:2px solid var(--negro);}
+  .instruccion{text-align:center; font-size:14px; color:#555; margin:14px auto 4px; max-width:500px; padding:0 10px;}
+  .botones-info{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:14px auto; max-width:700px; padding:0 10px;}
+  .btn-info{padding:10px 16px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:6px; color:#fff;}
+  .btn-historia{background:#ffffff; color:var(--negro); border:2px solid var(--negro) !important;}
+  .btn-instagram-nav{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);}
+  .btn-premios{background:#ffffff; color:var(--negro); border:2px solid var(--negro) !important;}
+  .btn-mis-numeros{background:#ffffff; color:var(--negro); border:2px solid var(--negro) !important;}
+  .btn-info:hover{filter:brightness(0.95);}
+  .toolbar{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:10px auto; max-width:600px; padding:0 10px;}
+  #buscador{flex:1; min-width:200px; padding:10px; border-radius:8px; border:2px solid var(--negro);}
+  .leyenda{display:flex; justify-content:center; gap:16px; flex-wrap:wrap; font-size:12px; margin-bottom:6px; color:#444;}
+  .leyenda span{display:flex; align-items:center; gap:5px;}
+  .leyenda i{width:12px; height:12px; border-radius:3px; display:inline-block;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(58px,1fr)); gap:6px; max-width:1000px; margin:20px auto; padding:0 10px;}
+  .numero{aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:bold; color:#3a3a3a; cursor:pointer; font-size:13px; user-select:none; transition:transform .1s; border:2px solid rgba(0,0,0,.1);}
+  .numero:hover{transform:scale(1.08);}
+  .disponible{background:var(--verde);}
+  .vendido{background:var(--rojo); color:#5a1f1f;}
+  .reservado{background:var(--amarillo); color:#6b5900;}
+  .seleccionado{background:var(--azul); color:#1a1a1a; box-shadow:0 0 0 3px #37474f inset;}
+  .overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); align-items:center; justify-content:center; z-index:999; padding:15px;}
+  .overlay.active{display:flex;}
+  .modal{background:#fff; border-radius:12px; padding:24px 20px 20px 20px; width:100%; max-width:380px; max-height:90vh; overflow-y:auto; position:relative;}
+  .modal h3{margin-top:0; text-align:center; color:var(--negro);}
+  .modal label{display:block; margin-top:10px; font-size:14px; font-weight:bold;}
+  .modal input{width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:6px;}
+  .modal-buttons{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;}
+  .modal-buttons button{flex:1; padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; min-width:90px;}
+  .btn-guardar{background:var(--neutro); color:#fff;}
+  .btn-cerrar{background:#ccc;}
+  .btn-secundario{background:none; border:1px solid var(--neutro) !important; color:var(--neutro);}
+  .loading{text-align:center; padding:20px; color:#888;}
+  .barra-seleccion{display:none; position:fixed; bottom:0; left:0; right:0; background:var(--negro); color:#fff; padding:12px 16px; z-index:900; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;}
+  .barra-seleccion.activa{display:flex;}
+  .barra-seleccion .info{font-size:14px;}
+  .barra-seleccion .acciones{display:flex; gap:8px;}
+  .barra-seleccion button{border:none; padding:10px 16px; border-radius:8px; font-weight:bold; cursor:pointer;}
+  .btn-reservar{background:var(--neutro); color:#fff;}
+  .btn-cancelar-sel{background:#c0392b; color:#fff;}
+
+  .aviso-flotante{display:none; position:fixed; top:10px; left:50%; transform:translateX(-50%); background:var(--amarillo); color:#6b5900; font-weight:bold; padding:10px 16px; border-radius:30px; box-shadow:0 3px 10px rgba(0,0,0,.25); z-index:950; font-size:13px; text-align:center; max-width:92vw; cursor:pointer;}
+  .aviso-flotante.activo{display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center;}
+  .aviso-flotante .btn-ver{background:#1a1a1a; color:#fff; border:none; padding:6px 12px; border-radius:16px; font-size:12px; cursor:pointer; font-weight:bold;}
+
+  .btn-ig-dm{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color:#fff; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:bold; text-decoration:none; white-space:nowrap;}
+
+  .toast-container{position:fixed; bottom:100px; left:50%; transform:translateX(-50%); z-index:1100; display:flex; flex-direction:column; gap:8px; align-items:center;}
+  .toast{background:#1a1a1a; color:#fff; padding:12px 18px; border-radius:8px; font-size:14px; box-shadow:0 3px 10px rgba(0,0,0,.3); opacity:0; animation:toastIn .3s forwards, toastOut .3s forwards 3s; max-width:90vw; text-align:center;}
+  .toast.exito{background:#4a8f6b;}
+  .toast.error{background:#c0392b;}
+  .toast.info{background:var(--neutro);}
+  @keyframes toastIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+  @keyframes toastOut{from{opacity:1;} to{opacity:0;}}
+
+  .premio-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#f9f9f9;
+    border-radius:8px;
+    padding:14px 16px;
+    margin-bottom:10px;
+    border-left:5px solid var(--neutro);
+    gap:12px;
+    min-height:52px;
+    box-shadow:0 1px 4px rgba(0,0,0,.06);
+  }
+  .premio-item.primero{border-left-color:#f1c40f;}
+  .premio-item.segundo{border-left-color:#bdc3c7;}
+  .premio-item.tercero{border-left-color:#cd7f32;}
+  .premio-item.cuarto{border-left-color:var(--naranja);}
+  .premio-item .lugar{font-weight:bold; color:var(--negro); white-space:nowrap; flex-shrink:0;}
+  .premio-item .valor{font-weight:bold; color:var(--naranja); font-size:15px; text-align:right;}
+  .sorteo-info{background:#eef3fb; border-left:5px solid #34495e; border-radius:8px; padding:12px 14px; margin-top:22px; font-size:13px; color:#2c3e50; line-height:1.5;}
+  .sorteo-info h4{margin:0 0 8px 0; font-size:14px; color:#1a1a1a;}
+
+  .modal-close-x{position:absolute; top:10px; right:12px; background:none; border:none; font-size:22px; line-height:1; color:#999; cursor:pointer; padding:4px 8px; border-radius:50%; transition:background .2s;}
+  .modal-close-x:hover{background:#f0f0f0; color:#333;}
+
+  .historia-header{text-align:center; margin-bottom:14px;}
+  .historia-header .emoji-grande{font-size:34px;}
+  .historia-header h3{margin:6px 0 0 0;}
+  .historia-parrafo{font-size:14px; color:#333; line-height:1.6; margin-bottom:14px;}
+  .historia-destacado{background:#f2f2f2; border-left:4px solid var(--neutro); padding:10px 14px; border-radius:6px; font-style:italic; color:#4a4a4a; margin:16px 0; font-size:14px;}
+  .historia-divisor{border:none; border-top:1px solid #eee; margin:16px 0;}
+
+  .paso-titulo{display:flex; align-items:center; gap:8px; font-weight:bold; font-size:14px; color:var(--negro); margin-top:16px;}
+  .paso-numero{background:var(--neutro); color:#fff; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;}
+  .paso-divisor{border:none; border-top:1px solid #eee; margin:14px 0 0 0;}
+  .paso-texto{font-size:13px; color:#555; margin:4px 0 10px 30px;}
+  .alias-box{background:#fff8e1; border:2px solid #b8860b; border-radius:8px; padding:12px; text-align:center; margin:6px 0 0 30px;}
+  .alias-box .alias-label{font-size:12px; color:#7a5c00; display:block; margin-bottom:2px;}
+  .alias-box .alias-valor{font-size:20px; font-weight:bold; color:#7a5c00; letter-spacing:.5px;}
+  .btn-copiar{background:none; border:1px solid #b8860b; color:#7a5c00; font-size:11px; padding:3px 10px; border-radius:12px; cursor:pointer; margin-top:6px;}
+  .btn-ig-directo{width:calc(100% - 30px); margin-left:30px; padding:12px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:#fff; background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); display:block; text-align:center; text-decoration:none; font-size:13px;}
+  .resumen-reserva{background:#f4f4f4; border-radius:8px; padding:12px 14px; margin-bottom:6px;}
+  .resumen-reserva .monto{font-weight:bold; font-size:22px; color:var(--neutro-oscuro); margin-top:6px;}
+
+  .numeros-badges{display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 10px 0;}
+  .numero-badge{background:var(--verde); color:#1a1a1a; font-weight:bold; font-size:14px; border-radius:8px; padding:8px 0; width:46px; text-align:center; border:2px solid rgba(0,0,0,.1);}
+
+  .btn-whatsapp{width:calc(100% - 30px); margin-left:30px; padding:11px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:#fff; background:#25D366; display:block; text-align:center; text-decoration:none; font-size:13px; margin-top:8px;}
+  .whatsapp-hint{font-size:11px; color:#888; margin:4px 0 0 30px;}
+
+  .datos-personales{margin-left:30px;}
+
+  .historial-item{display:flex; justify-content:space-between; align-items:center; background:#f9f9f9; border-radius:8px; padding:10px 14px; margin-bottom:8px; font-size:14px;}
+  .historial-item .numero-hist{font-weight:bold; font-size:16px;}
+  .historial-item .fecha-hist{font-size:11px; color:#888; display:block;}
+  .badge-estado{padding:4px 10px; border-radius:12px; font-size:11px; font-weight:bold; white-space:nowrap;}
+  .badge-vendido{background:var(--rojo); color:#5a1f1f;}
+  .badge-reservado{background:var(--amarillo); color:#6b5900;}
+  .badge-liberado{background:#e0e0e0; color:#666;}
+  .historial-vacio{text-align:center; color:#888; font-size:13px; padding:20px 0;}
+</style>
+</head>
+<body>
+
+<div class="overlay active" id="overlayBienvenida">
+  <div class="modal" style="text-align:center;">
+    <button class="modal-close-x" onclick="cerrarBienvenida()">✕</button>
+    <h3>🏆 ¡Bienvenido a la Rifa NH-Fitness!</h3>
+    <p style="font-size:14px; color:#333; margin:15px 0; text-align:left;">
+      Gracias por sumarte! esta rifa es organizada para acompañar el crecimiento de Nh Fitness, el espacio que Nacho construyo con esfuerzo, pasión y que sostiene dia a dia con resiliencia y entrega. 
+Él nos empujo a ser mejores, ahora queremos empujar su proyecto aún mas lejos. Tu participación suma a esta historia de crecimiento compartido. 🧡
+    </p>
+    <div class="modal-buttons">
+      <button class="btn-guardar" style="width:100%;" onclick="cerrarBienvenida()">Ingresar</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <img src="logo.png" alt="Logo NH Fitness">
+  <h2>🎟 Rifa NH-Fitness</h2>
+</header>
+
+<div class="precio-banner" id="precioBanner">💵 Valor del número: $5.000</div>
+
+<div class="aviso-flotante" id="avisoFlotante" onclick="abrirMiReserva()">
+  <span>⏱ Tenés una reserva pendiente de pago</span>
+  <button type="button" class="btn-ver">Ver instrucciones</button>
+</div>
+
+<div class="botones-info">
+  <button class="btn-info btn-historia" onclick="abrirModal('overlayHistoria')">📖 CONOCE LA HISTORIA DE NH</button>
+  <button class="btn-info btn-instagram-nav" onclick="abrirModal('overlayInstagram')">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.98-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+    SEGUINOS EN INSTAGRAM
+  </button>
+  <button class="btn-info btn-premios" onclick="abrirModal('overlayPremios')">🏆 VER PREMIOS</button>
+  <button class="btn-info btn-mis-numeros" onclick="abrirMisNumeros()">🎟 MIS NÚMEROS</button>
+</div>
+
+<p class="instruccion">👉 Tocá los números que querés comprar. Podés elegir más de uno.</p>
+
+<div class="leyenda">
+  <span><i style="background:var(--verde);"></i> Disponible</span>
+  <span><i style="background:var(--azul);"></i> Seleccionado</span>
+  <span><i style="background:var(--amarillo);"></i> Reservado (pendiente de pago)</span>
+  <span><i style="background:var(--rojo);"></i> Vendido</span>
+</div>
+
+<div class="toolbar">
+  <input id="buscador" type="text" placeholder="Buscar número...">
+</div>
+
+<div id="cargando" class="loading">Cargando números...</div>
+<div class="grid" id="grid"></div>
+
+<div class="barra-seleccion" id="barraSeleccion">
+  <div class="info">🎯 <span id="cantSeleccionados">0</span> número(s) — Total: <b id="totalSeleccion">$0</b></div>
+  <div class="acciones">
+    <button class="btn-reservar" onclick="abrirReserva()">Reservar</button>
+    <button class="btn-cancelar-sel" onclick="cancelarSeleccion()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal: Historia completa -->
+<div class="overlay" id="overlayHistoria">
+  <div class="modal">
+    <button class="modal-close-x" onclick="cerrarModal('overlayHistoria')">✕</button>
+    <div class="historia-header">
+      <div class="emoji-grande">💪</div>
+      <h3>La historia de Nacho</h3>
+    </div>
+
+    <p class="historia-parrafo">Hay personas que enseñan con palabras. <b>Otras enseñan con el ejemplo.</b></p>
+
+    <p class="historia-parrafo">Quienes conocen a Nacho saben que nunca fue solamente un profesor de entrenamiento. Siempre fue ese que alentó cuando alguien quería abandonar, el que creyó en sus alumnos cuando ellos mismos habían dejado de creer, el que demostró que la disciplina y la constancia pueden cambiar una vida.</p>
+
+    <hr class="historia-divisor">
+
+    <p class="historia-parrafo">Pero hace un tiempo, la vida le puso la prueba más difícil.</p>
+
+    <p class="historia-parrafo">Un accidente cambió todo. Perdió una pierna, enfrentó meses de internaciones, cirugías y rehabilitación. Lo que para muchos habría significado un final, para él fue el comienzo de una nueva forma de vivir.</p>
+
+    <div class="historia-destacado">"Nacho nunca dejó que una amputación definiera quién era."</div>
+
+    <p class="historia-parrafo">Volvió a entrenar. Volvió a enseñar. Volvió a acompañar a cada persona que confía en él. Con una prótesis, con esfuerzo y con la misma pasión de siempre. Porque su propósito siempre fue más grande que cualquier obstáculo.</p>
+
+    <hr class="historia-divisor">
+
+    <p class="historia-parrafo"><b>Hoy queremos hacer algo por él.</b></p>
+
+    <p class="historia-parrafo">No porque no pueda hacerlo solo, sino porque creemos en todo lo que construyó. Porque NH Fitness es mucho más que un grupo de entrenamiento: es un lugar donde muchas personas encontraron salud, confianza, disciplina y una comunidad que las impulsa a ser mejores.</p>
+
+    <p class="historia-parrafo">Con esta rifa queremos aportar nuestro granito de arena para que NH Fitness siga creciendo y facilitar el trabajo diario de Nacho.</p>
+
+    <div class="historia-destacado">Cada número que comprás no es solo una participación. Es una forma de apoyar un proyecto que transforma vidas.</div>
+
+    <p class="historia-parrafo">Es una forma de agradecer a alguien que nunca dejó de dar lo mejor de sí y de demostrar que, cuando una comunidad crece unida, los sueños pesan mucho menos.</p>
+
+    <hr class="historia-divisor">
+
+    <p class="historia-parrafo" style="text-align:center;"><b>Gracias por ser parte de esta historia.</b><br>Porque las grandes transformaciones no las hace una sola persona. Las hace una comunidad que decide caminar unida, incluso cuando el camino parece cuesta arriba. 💛</p>
+
+    <div class="modal-buttons">
+      <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayHistoria')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Instagram -->
+<div class="overlay" id="overlayInstagram">
+  <div class="modal" style="text-align:center;">
+    <button class="modal-close-x" onclick="cerrarModal('overlayInstagram')">✕</button>
+    <h3>📸 Seguinos en Instagram</h3>
+    <p style="font-size:14px; color:#333;">Enterate de todas las novedades de la rifa y de NH Fitness</p>
+    <div class="modal-buttons" style="flex-direction:column;">
+      <a href="https://www.instagram.com/nh.fitnes?igsh=b2dxdTJuNzlqZTNx" target="_blank" style="text-decoration:none;">
+        <button class="btn-instagram-nav" style="width:100%; padding:12px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:#fff;">@nh.fitnes</button>
+      </a>
+      <a href="https://www.instagram.com/nacho_heinze?igsh=OWJqOWo3M2l0dnky" target="_blank" style="text-decoration:none;">
+        <button class="btn-instagram-nav" style="width:100%; padding:12px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; color:#fff;">@nacho_heinze</button>
+      </a>
+      <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayInstagram')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Premios + información del sorteo -->
+<div class="overlay" id="overlayPremios">
+  <div class="modal">
+    <button class="modal-close-x" onclick="cerrarModal('overlayPremios')">✕</button>
+    <h3>🏆 Premios</h3>
+    <div class="premio-item primero">
+      <span class="lugar">🥇 Primer premio</span>
+      <span class="valor">$400.000</span>
+    </div>
+    <div class="premio-item segundo">
+      <span class="lugar">🥈 Segundo premio</span>
+      <span class="valor">$200.000</span>
+    </div>
+    <div class="premio-item tercero">
+      <span class="lugar">🥉 Tercer premio</span>
+      <span class="valor">$100.000</span>
+    </div>
+    <div class="premio-item cuarto">
+      <span class="lugar">🎁 4to premio</span>
+      <span class="valor">Parlante JBL Go Essential</span>
+    </div>
+
+    <div class="sorteo-info">
+      <h4>🎲 ¿Cómo se realiza el sorteo?</h4>
+      <p>El sorteo se llevará a cabo el <b>viernes 21 de agosto</b>, utilizando como base los resultados oficiales de la <b>Lotería Nacional – Sorteo Nocturno</b> de esa misma fecha.</p>
+      <p>Para determinar los números ganadores, se tomarán los <b>tres últimos dígitos</b> de los números premiados en dicho sorteo oficial.</p>
+      <p>De esta manera, el resultado depende exclusivamente de un sorteo público, oficial y verificable, garantizando total transparencia en la definición de los ganadores.</p>
+      <p>🔎 Podés verificar los resultados del sorteo de la Lotería Nacional de forma pública una vez finalizado, el mismo día, haciendo clic <a href="https://www.loteriadelaciudad.gob.ar/resultados" target="_blank" style="color:#2c3e50; font-weight:bold;">aquí</a>.</p>
+    </div>
+
+    <div class="modal-buttons">
+      <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayPremios')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Reserva (1-Números 2-Datos 3-Transferencia 4-Comprobante 5-WhatsApp) -->
+<div class="overlay" id="overlayReserva">
+  <div class="modal">
+    <button class="modal-close-x" onclick="cancelarReserva()">✕</button>
+    <h3>Confirmar selección</h3>
+
+    <div class="resumen-reserva">
+      <p style="margin:0; font-size:13px; color:#666;">Números elegidos:</p>
+      <div class="numeros-badges" id="listaSeleccionados"></div>
+      <p style="margin:0; font-size:13px; color:#666;">Monto total a transferir:</p>
+      <p class="monto" id="montoTotal">$0</p>
+    </div>
+
+    <hr class="paso-divisor">
+    <div class="paso-titulo"><span class="paso-numero">1</span> Completá tus datos</div>
+    <div class="datos-personales">
+      <label>Nombre y apellido</label>
+      <input type="text" id="reservaNombre" placeholder="Ej: Juan Pérez">
+      <label>Teléfono (WhatsApp)</label>
+      <input type="text" id="reservaTelefono" placeholder="Ej: 11 2345 6789 (sin 0 ni 15)">
+      <p class="whatsapp-hint" style="margin-left:0;">Escribí tu número sin el 0 de característica ni el 15 (Ej: si tu número es 011 15-2345-6789, escribí 1123456789).</p>
+    </div>
+
+    <hr class="paso-divisor">
+    <div class="paso-titulo"><span class="paso-numero">2</span> Transferí el monto</div>
+    <p class="paso-texto">Hacé la transferencia por el monto total al siguiente alias:</p>
+    <div class="alias-box">
+      <span class="alias-label">Alias</span>
+      <span class="alias-valor">nh.rifa</span><br>
+      <button type="button" class="btn-copiar" onclick="copiarAlias()">📋 Copiar alias</button>
+    </div>
+
+    <hr class="paso-divisor">
+    <div class="paso-titulo"><span class="paso-numero">3</span> Enviá el comprobante</div>
+    <p class="paso-texto">Una vez realizada la transferencia, descargá el comprobante y enviánoslo por mensaje directo de Instagram tocando el siguiente botón:</p>
+    <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-directo">📩 Enviar comprobante por Instagram Directo</a>
+
+    <hr class="paso-divisor">
+    <a href="#" id="btnWhatsappReserva" class="btn-whatsapp" style="margin-left:0; width:100%; margin-top:12px;" target="_blank" onclick="return prepararWhatsapp('reserva')">📲 Enviarme este resumen por WhatsApp</a>
+
+    <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
+      ⏱ Te pedimos que transfieras dentro de los <b>15 minutos</b>. El administrador revisará tu pago manualmente y confirmará tu número apenas lo reciba — los números reservados no se liberan solos. Podés volver a esta página en cualquier momento y tocar el aviso amarillo de arriba, o el botón "Mis números", para ver estas instrucciones de nuevo.
+    </p>
+
+    <div class="modal-buttons">
+      <button class="btn-guardar" onclick="confirmarReserva()">Reservar</button>
+      <button class="btn-cerrar" onclick="cancelarReserva()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Mi reserva pendiente -->
+<div class="overlay" id="overlayMiReserva">
+  <div class="modal">
+    <button class="modal-close-x" onclick="cerrarModal('overlayMiReserva')">✕</button>
+    <h3>Tu reserva pendiente</h3>
+
+    <div class="resumen-reserva">
+      <p style="margin:0; font-size:13px; color:#666;">Números reservados:</p>
+      <div class="numeros-badges" id="miReservaNumeros"></div>
+      <p style="margin:0; font-size:13px; color:#666;">Monto total a transferir:</p>
+      <p class="monto" id="miReservaMonto">$0</p>
+    </div>
+
+    <hr class="paso-divisor">
+    <div class="paso-titulo"><span class="paso-numero">1</span> Transferí el monto</div>
+    <p class="paso-texto">Si todavía no lo hiciste, transferí el monto total al siguiente alias:</p>
+    <div class="alias-box">
+      <span class="alias-label">Alias</span>
+      <span class="alias-valor">nh.rifa</span><br>
+      <button type="button" class="btn-copiar" onclick="copiarAlias()">📋 Copiar alias</button>
+    </div>
+
+    <hr class="paso-divisor">
+    <div class="paso-titulo"><span class="paso-numero">2</span> Enviá el comprobante</div>
+    <p class="paso-texto">Descargá el comprobante de la transferencia y enviánoslo por mensaje directo de Instagram tocando el siguiente botón:</p>
+    <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-directo">📩 Enviar comprobante por Instagram Directo</a>
+
+    <hr class="paso-divisor">
+    <a href="#" id="btnWhatsappMiReserva" class="btn-whatsapp" style="margin-left:0; width:100%; margin-top:12px;" target="_blank" onclick="return prepararWhatsapp('miReserva')">📲 Enviarme este resumen por WhatsApp</a>
+
+    <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
+      ⏱ Te pedimos que transfieras dentro de los 15 minutos desde la reserva. El administrador confirmará tu pago manualmente apenas lo reciba — tu número queda a tu nombre hasta que el administrador lo revise.
+    </p>
+
+    <div class="modal-buttons">
+      <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayMiReserva')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Mis números -->
+<div class="overlay" id="overlayMisNumeros">
+  <div class="modal">
+    <button class="modal-close-x" onclick="cerrarModal('overlayMisNumeros')">✕</button>
+    <h3>🎟 Mis números</h3>
+    <p style="font-size:13px; color:#666; text-align:center; margin-top:-6px;">
+      Todos los números que reservaste desde este dispositivo, con su estado actual.
+    </p>
+    <div id="listaMisNumeros" style="margin-top:14px;"></div>
+    <div class="modal-buttons">
+      <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayMisNumeros')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, orderBy, query
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAqV6XxYj5HgWmNRXdOKvGa2aeYG-X3Rpc",
+  authDomain: "nh-fitness-rifa-987f4.firebaseapp.com",
+  projectId: "nh-fitness-rifa-987f4",
+  storageBucket: "nh-fitness-rifa-987f4.firebasestorage.app",
+  messagingSenderId: "115097433531",
+  appId: "1:115097433531:web:9ba99c6b4e766d01ddc09e"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const PRECIO_UNITARIO = 5000;
+const MINUTOS_RESERVA = 15;
+const FECHA_SORTEO_TEXTO = "viernes 21 de agosto (Lotería Nacional - Sorteo Nocturno)";
+
+let numeros = [];
+let seleccionados = [];
+
+const q = query(collection(db, "numeros"), orderBy("__name__"));
+onSnapshot(q, (snapshot) => {
+  numeros = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  document.getElementById("cargando").style.display = "none";
+  render();
+  revisarEstadoReservaLocal();
+});
+
+function estadoDe(n){
+  if(n.vendido) return "vendido";
+  if(n.reservado) return "reservado";
+  return "disponible";
+}
+
+window.render = function(){
+  const grid = document.getElementById("grid");
+  const filtro = document.getElementById("buscador").value.trim();
+  grid.innerHTML = "";
+
+  numeros.forEach(n=>{
+    if(filtro && !n.id.includes(filtro)) return;
+    const estado = estadoDe(n);
+    const div = document.createElement("div");
+    div.className = "numero " + estado;
+    if(seleccionados.includes(n.id)) div.className = "numero seleccionado";
+    div.textContent = n.id;
+    div.onclick = () => onClickNumero(n.id);
+    grid.appendChild(div);
+  });
+
+  actualizarBarraSeleccion();
+};
+
+function onClickNumero(id){
+  const n = numeros.find(x=>x.id===id);
+  const estado = estadoDe(n);
+
+  if(estado === "disponible"){
+    const idx = seleccionados.indexOf(id);
+    if(idx>-1) seleccionados.splice(idx,1);
+    else seleccionados.push(id);
+    render();
+  } else if(estado === "reservado"){
+    mostrarToast("Este número ya fue reservado por otro comprador. Esperá a que se libere o elegí otro.", "error");
+  } else {
+    mostrarToast("Este número ya fue vendido.", "error");
+  }
+}
+
+function actualizarBarraSeleccion(){
+  const barra = document.getElementById("barraSeleccion");
+  if(seleccionados.length>0){
+    barra.classList.add("activa");
+    document.getElementById("cantSeleccionados").textContent = seleccionados.length;
+    document.getElementById("totalSeleccion").textContent = "$" + (seleccionados.length*PRECIO_UNITARIO).toLocaleString("es-AR");
+  } else {
+    barra.classList.remove("activa");
+  }
+}
+
+function renderBadges(containerId, listaNumeros){
+  const cont = document.getElementById(containerId);
+  cont.innerHTML = listaNumeros.map(n => `<div class="numero-badge">${n}</div>`).join("");
+}
+
+window.cancelarSeleccion = function(){ seleccionados = []; render(); };
+
+window.abrirReserva = function(){
+  if(seleccionados.length===0) return;
+  renderBadges("listaSeleccionados", seleccionados);
+  document.getElementById("montoTotal").textContent = "$" + (seleccionados.length*PRECIO_UNITARIO).toLocaleString("es-AR");
+  document.getElementById("overlayReserva").classList.add("active");
+};
+
+window.cancelarReserva = function(){
+  document.getElementById("overlayReserva").classList.remove("active");
+};
+
+window.copiarAlias = function(){
+  navigator.clipboard.writeText("nh.rifa").then(()=>{
+    mostrarToast("✅ Alias copiado al portapapeles", "exito");
+  }).catch(()=>{
+    mostrarToast("No se pudo copiar. Copialo manualmente: nh.rifa", "info");
+  });
+};
+
+function formatearTelefonoWhatsapp(telefono){
+  let limpio = telefono.replace(/[^\d]/g, "");
+
+  if(limpio.startsWith("0")) limpio = limpio.substring(1);
+  limpio = limpio.replace(/^(\d{2,4})15(\d+)$/, "$1$2");
+
+  if(limpio.startsWith("549")){
+    // ya está completo
+  } else if(limpio.startsWith("54")){
+    limpio = "549" + limpio.substring(2);
+  } else {
+    limpio = "549" + limpio;
+  }
+
+  return limpio;
+}
+
+function construirMensajeWhatsapp(listaNumeros, monto){
+  return `🎟 *Rifa NH-Fitness*\n\n`
+    + `Números reservados: ${listaNumeros.join(", ")}\n`
+    + `Monto a transferir: $${monto.toLocaleString("es-AR")}\n`
+    + `Alias para transferir: nh.rifa\n\n`
+    + `📅 Fecha del sorteo: ${FECHA_SORTEO_TEXTO}\n\n`
+    + `📩 Recordá enviar el comprobante por Instagram: https://ig.me/m/nh.fitnes`;
+}
+
+window.prepararWhatsapp = function(origen){
+  let telefono, listaNumeros, monto;
+
+  if(origen === "reserva"){
+    telefono = document.getElementById("reservaTelefono").value.trim();
+    listaNumeros = seleccionados;
+    monto = seleccionados.length * PRECIO_UNITARIO;
+  } else {
+    telefono = localStorage.getItem("reservaTelefono") || "";
+    listaNumeros = JSON.parse(localStorage.getItem("reservaNumeros") || "[]");
+    monto = listaNumeros.length * PRECIO_UNITARIO;
+  }
+
+  if(!telefono){
+    mostrarToast("Completá primero tu número de teléfono para poder enviarte el resumen.", "error");
+    return false;
+  }
+  if(listaNumeros.length === 0){
+    mostrarToast("No hay números para incluir en el resumen.", "error");
+    return false;
+  }
+
+  const telWhatsapp = formatearTelefonoWhatsapp(telefono);
+  const mensaje = encodeURIComponent(construirMensajeWhatsapp(listaNumeros, monto));
+  const url = `https://wa.me/${telWhatsapp}?text=${mensaje}`;
+
+  window.open(url, "_blank");
+  return false;
+};
+
+function agregarAlHistorial(idsNuevos, reservaId){
+  const historial = JSON.parse(localStorage.getItem("historialNumeros") || "[]");
+  const fecha = new Date().toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit", year:"numeric" });
+
+  idsNuevos.forEach(numero => {
+    const yaExiste = historial.some(h => h.numero === numero);
+    if(!yaExiste){
+      historial.push({ numero, reservaId, fecha });
+    }
+  });
+
+  localStorage.setItem("historialNumeros", JSON.stringify(historial));
+}
+
+window.confirmarReserva = async function(){
+  const nombre = document.getElementById("reservaNombre").value.trim();
+  const telefono = document.getElementById("reservaTelefono").value.trim();
+
+  if(!nombre || !telefono){
+    mostrarToast("Por favor completá tu nombre y teléfono.", "error");
+    return;
+  }
+
+  const vencimiento = Date.now() + MINUTOS_RESERVA*60*1000;
+  const reservaId = "r_" + Date.now() + "_" + Math.random().toString(36).slice(2,8);
+
+  try{
+    for(const id of seleccionados){
+      await updateDoc(doc(db,"numeros",id), {
+        vendido: false,
+        reservado: true,
+        reservadoHasta: vencimiento,
+        reservaId: reservaId
+      });
+      await setDoc(doc(db,"compradores_privados",id), {
+        nombre: nombre,
+        contacto: telefono,
+        reservaId: reservaId
+      });
+    }
+
+    localStorage.setItem("reservaVencimiento", vencimiento);
+    localStorage.setItem("reservaNumeros", JSON.stringify(seleccionados));
+    localStorage.setItem("reservaTelefono", telefono);
+    agregarAlHistorial(seleccionados, reservaId);
+    activarAvisoFlotante();
+
+    document.getElementById("overlayReserva").classList.remove("active");
+    document.getElementById("reservaNombre").value = "";
+    document.getElementById("reservaTelefono").value = "";
+    mostrarToast("✅ Números reservados. Recordá transferir y enviar el comprobante — el administrador confirmará tu pago manualmente.", "exito");
+
+    seleccionados = [];
+  }catch(err){
+    mostrarToast("Ocurrió un error al reservar. Intentá de nuevo.", "error");
+    console.error(err);
+  }
+};
+
+window.cerrarBienvenida = function(){ document.getElementById("overlayBienvenida").classList.remove("active"); };
+
+window.abrirModal = function(id){ document.getElementById(id).classList.add("active"); };
+window.cerrarModal = function(id){ document.getElementById(id).classList.remove("active"); };
+
+window.mostrarToast = function(mensaje, tipo){
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = "toast " + (tipo || "info");
+  toast.textContent = mensaje;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3300);
+};
+
+function activarAvisoFlotante(){
+  const aviso = document.getElementById("avisoFlotante");
+  aviso.classList.add("activo");
+}
+
+function desactivarAvisoFlotante(){
+  const aviso = document.getElementById("avisoFlotante");
+  aviso.classList.remove("activo");
+  document.getElementById("overlayMiReserva").classList.remove("active");
+}
+
+window.abrirMiReserva = function(){
+  const numerosGuardados = JSON.parse(localStorage.getItem("reservaNumeros") || "[]");
+  const monto = numerosGuardados.length * PRECIO_UNITARIO;
+  renderBadges("miReservaNumeros", numerosGuardados);
+  document.getElementById("miReservaMonto").textContent = "$" + monto.toLocaleString("es-AR");
+  document.getElementById("overlayMiReserva").classList.add("active");
+};
+
+let ultimoEstadoNotificado = null;
+
+function revisarEstadoReservaLocal(){
+  const numerosGuardadosRaw = localStorage.getItem("reservaNumeros");
+  if(!numerosGuardadosRaw) return;
+
+  const numerosGuardados = JSON.parse(numerosGuardadosRaw);
+  if(!numerosGuardados || numerosGuardados.length === 0) return;
+
+  const numerosEnBase = numerosGuardados.map(id => numeros.find(n => n.id === id)).filter(Boolean);
+  if(numerosEnBase.length === 0) return;
+
+  const todosVendidos = numerosEnBase.every(n => n.vendido);
+  const ningunoReservadoNiVendido = numerosEnBase.every(n => !n.reservado && !n.vendido);
+
+  if(todosVendidos){
+    if(ultimoEstadoNotificado !== "confirmado"){
+      mostrarToast("🎉 ¡Tu pago fue confirmado! Ya sos parte de la Rifa NH-Fitness. ¡Mucha suerte!", "exito");
+      ultimoEstadoNotificado = "confirmado";
+    }
+    desactivarAvisoFlotante();
+    localStorage.removeItem("reservaVencimiento");
+    localStorage.removeItem("reservaNumeros");
+    localStorage.removeItem("reservaTelefono");
+  } else if(ningunoReservadoNiVendido){
+    if(ultimoEstadoNotificado !== "liberado"){
+      mostrarToast("⚠ Tu reserva fue liberada por el administrador. Si ya transferiste, escribinos por Instagram.", "info");
+      ultimoEstadoNotificado = "liberado";
+    }
+    desactivarAvisoFlotante();
+    localStorage.removeItem("reservaVencimiento");
+    localStorage.removeItem("reservaNumeros");
+    localStorage.removeItem("reservaTelefono");
+  } else {
+    activarAvisoFlotante();
+  }
+}
+
+window.abrirMisNumeros = function(){
+  const historial = JSON.parse(localStorage.getItem("historialNumeros") || "[]");
+  const contenedor = document.getElementById("listaMisNumeros");
+
+  if(historial.length === 0){
+    contenedor.innerHTML = "<p class='historial-vacio'>Todavía no reservaste ningún número desde este dispositivo.</p>";
+    document.getElementById("overlayMisNumeros").classList.add("active");
+    return;
+  }
+
+  const historialOrdenado = [...historial].reverse();
+
+  contenedor.innerHTML = historialOrdenado.map(item => {
+    const nActual = numeros.find(n => n.id === item.numero);
+    let badgeClase = "badge-liberado";
+    let badgeTexto = "⚪ Liberado";
+
+    if(nActual){
+      if(nActual.vendido){
+        badgeClase = "badge-vendido";
+        badgeTexto = "🔴 Confirmado";
+      } else if(nActual.reservado){
+        badgeClase = "badge-reservado";
+        badgeTexto = "🟡 Pendiente de aprobación";
+      }
+    }
+
+    return `
+      <div class="historial-item">
+        <div>
+          <span class="numero-hist">Nº ${item.numero}</span>
+          <span class="fecha-hist">Reservado el ${item.fecha}</span>
+        </div>
+        <span class="badge-estado ${badgeClase}">${badgeTexto}</span>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("overlayMisNumeros").classList.add("active");
+};
+
+const numerosGuardadosInicio = localStorage.getItem("reservaNumeros");
+if(numerosGuardadosInicio && JSON.parse(numerosGuardadosInicio).length > 0){
+  activarAvisoFlotante();
+}
+
+document.getElementById("buscador").addEventListener("input", render);
+</script>
+
+</body>
+</html>
