@@ -100,7 +100,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDoc, onSnapshot, updateDoc, orderBy, query
+  getFirestore, collection, doc, getDoc, onSnapshot, updateDoc, orderBy, query, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
@@ -156,7 +156,6 @@ function estadoDe(n){
   return "disponible";
 }
 
-// Aplica un filtro de estado al tocar una de las cajitas de estadísticas.
 window.aplicarFiltroEstado = function(estado){
   filtroEstadoActual = estado;
   document.getElementById("filtroEstado").value = estado;
@@ -302,10 +301,18 @@ async function confirmarPagoAdmin(ids){
   cerrarModalAdmin();
 }
 
+// ===== FUNCIÓN CORREGIDA: ahora también borra el documento de compradores_privados =====
 async function liberarNumeroAdmin(ids){
   const lista = Array.isArray(ids) ? ids : [ids];
   for(const id of lista){
-    await updateDoc(doc(db,"numeros",id), { vendido: false, reservado: false, reservadoHasta: null });
+    await updateDoc(doc(db,"numeros",id), { vendido: false, reservado: false, reservadoHasta: null, reservaId: null });
+    // Borramos también los datos del comprador anterior para que el número
+    // quede "limpio" y pueda volver a reservarse sin error de permisos.
+    try{
+      await deleteDoc(doc(db,"compradores_privados",id));
+    }catch(err){
+      console.error("No se pudo borrar compradores_privados/" + id, err);
+    }
   }
   cerrarModalAdmin();
 }
