@@ -18,6 +18,13 @@
   .stat-box.reservados .num{color:#b8860b;}
   .stat-box.disponibles .num{color:var(--verde);}
   .stat-box.recaudado .num{color:#2c3e50; font-size:18px;}
+
+  /* ===== Mejora #12: barra de progreso de venta ===== */
+  .progreso-wrap{max-width:700px; margin:0 auto 15px auto; padding:0 15px;}
+  .progreso-container{background:#e0e0e0; border-radius:20px; overflow:hidden; height:22px;}
+  .progreso-barra{background:linear-gradient(90deg, var(--verde), #27ae60); height:100%; width:0%; transition:width .4s ease; border-radius:20px 0 0 20px;}
+  .progreso-texto{text-align:center; font-size:13px; color:#555; margin-top:6px; font-weight:bold;}
+
   .toolbar{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:10px auto; max-width:800px; padding:0 10px;}
   #buscador{flex:1; min-width:180px; padding:10px; border-radius:8px; border:1px solid #ccc;}
   #filtroEstado{padding:10px; border-radius:8px; border:1px solid #ccc; background:#fff; font-weight:bold; cursor:pointer;}
@@ -25,10 +32,13 @@
   #exportBtn{padding:10px 15px; border:none; border-radius:8px; background:#2c3e50; color:#fff; font-weight:bold; cursor:pointer;}
   .contador-resultados{text-align:center; font-size:13px; color:#666; margin:-6px 0 10px 0;}
   .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(58px,1fr)); gap:6px; max-width:1000px; margin:20px auto; padding:0 10px;}
-  .numero{aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:bold; color:#fff; cursor:pointer; font-size:13px; user-select:none; border:2px solid rgba(0,0,0,.15);}
-  .disponible{background:var(--verde);}
-  .vendido{background:var(--rojo);}
-  .reservado{background:var(--amarillo); color:#1a1a1a;}
+
+  /* ===== Mejora #11: accesibilidad — estilos de borde distintos por estado ===== */
+  .numero{aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:bold; color:#fff; cursor:pointer; font-size:13px; user-select:none; border:2px solid rgba(0,0,0,.3);}
+  .disponible{background:var(--verde); border-style:solid;}
+  .vendido{background:var(--rojo); border-style:double; border-width:4px;}
+  .reservado{background:var(--amarillo); color:#1a1a1a; border-style:dashed;}
+
   .sin-resultados{text-align:center; color:#888; padding:30px 0; grid-column:1/-1;}
   .overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); align-items:center; justify-content:center; z-index:999; padding:15px;}
   .overlay.active{display:flex;}
@@ -66,8 +76,13 @@
     <div class="stat-box recaudado" id="statRecaudado" onclick="aplicarFiltroEstado('todos')"><div class="num" id="totalRecaudado">$0</div><div>Recaudado</div></div>
   </div>
 
+  <div class="progreso-wrap">
+    <div class="progreso-container"><div class="progreso-barra" id="progresoBarra"></div></div>
+    <p class="progreso-texto" id="progresoTexto">0 de 1000 números vendidos (0%)</p>
+  </div>
+
   <div class="toolbar">
-    <input id="buscador" type="text" placeholder="Buscar número...">
+    <input id="buscador" type="text" placeholder="Buscar por número, nombre o teléfono...">
     <select id="filtroEstado">
       <option value="todos">📋 Todos los números</option>
       <option value="vendido">🔴 Solo vendidos</option>
@@ -100,7 +115,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDoc, onSnapshot, updateDoc, orderBy, query, deleteDoc
+  getFirestore, collection, doc, getDoc, onSnapshot, updateDoc, orderBy, query, deleteDoc, addDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
@@ -120,10 +135,12 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 const PRECIO_UNITARIO = 5000;
+const TOTAL_NUMEROS = 1000;
 
 let numeros = [];
 let esAdmin = false;
 let filtroEstadoActual = "todos";
+let datosCompradores = {}; // Mejora #6: cache de nombre/teléfono para buscador
 
 onAuthStateChanged(auth, (user) => {
   esAdmin = !!user;
@@ -143,11 +160,25 @@ window.logout = function(){ signOut(auth); };
 
 function iniciarEscuchaNumeros(){
   const q = query(collection(db, "numeros"), orderBy("__name__"));
-  onSnapshot(q, (snapshot) => {
+  onSnapshot(q, async (snapshot) => {
     numeros = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     document.getElementById("cargando").style.display = "none";
+    await actualizarDatosCompradores();
     render();
   });
+}
+
+// Mejora #6: precarga nombre/teléfono de números reservados o vendidos para poder buscarlos
+async function actualizarDatosCompradores(){
+  const relevantes = numeros.filter(n => n.reservado || n.vendido);
+  const promesas = relevantes.map(async n => {
+    if(datosCompradores[n.id]) return; // ya en caché
+    try{
+      const snap = await getDoc(doc(db,"compradores_privados", n.id));
+      datosCompradores[n.id] = snap.exists() ? snap.data() : {};
+    }catch(e){ datosCompradores[n.id] = {}; }
+  });
+  await Promise.all(promesas);
 }
 
 function estadoDe(n){
@@ -164,7 +195,7 @@ window.aplicarFiltroEstado = function(estado){
 
 window.render = function(){
   const grid = document.getElementById("grid");
-  const filtroTexto = document.getElementById("buscador").value.trim();
+  const filtroTexto = document.getElementById("buscador").value.trim().toLowerCase();
   filtroEstadoActual = document.getElementById("filtroEstado").value;
   grid.innerHTML = "";
 
@@ -177,7 +208,15 @@ window.render = function(){
   let mostrados = 0;
 
   numeros.forEach(n=>{
-    if(filtroTexto && !n.id.includes(filtroTexto)) return;
+    // Mejora #6: la búsqueda ahora también revisa nombre y teléfono del comprador
+    if(filtroTexto){
+      const datosComprador = datosCompradores[n.id] || {};
+      const coincideNumero = n.id.toLowerCase().includes(filtroTexto);
+      const coincideNombre = (datosComprador.nombre || "").toLowerCase().includes(filtroTexto);
+      const coincideTelefono = (datosComprador.contacto || "").toLowerCase().includes(filtroTexto);
+      if(!coincideNumero && !coincideNombre && !coincideTelefono) return;
+    }
+
     const estado = estadoDe(n);
     if(filtroEstadoActual !== "todos" && estado !== filtroEstadoActual) return;
 
@@ -210,7 +249,26 @@ window.render = function(){
   document.getElementById("countReservados").textContent = reservados;
   document.getElementById("countDisponibles").textContent = disponibles;
   document.getElementById("totalRecaudado").textContent = "$" + (vendidos*PRECIO_UNITARIO).toLocaleString("es-AR");
+
+  // Mejora #12: barra de progreso de venta
+  const pct = Math.round((vendidos / TOTAL_NUMEROS) * 100);
+  document.getElementById("progresoBarra").style.width = pct + "%";
+  document.getElementById("progresoTexto").textContent = `${vendidos} de ${TOTAL_NUMEROS} números vendidos (${pct}%)`;
 };
+
+// Mejora #3: registro de auditoría de acciones del administrador
+async function registrarHistorial(accion, ids){
+  try{
+    await addDoc(collection(db, "historial_admin"), {
+      accion: accion,
+      numeros: ids,
+      adminEmail: auth.currentUser?.email || "-",
+      fecha: serverTimestamp()
+    });
+  }catch(err){
+    console.error("No se pudo registrar en el historial de auditoría:", err);
+  }
+}
 
 async function abrirModalAdmin(n){
   const estado = estadoDe(n);
@@ -298,22 +356,22 @@ async function confirmarPagoAdmin(ids){
   for(const id of lista){
     await updateDoc(doc(db,"numeros",id), { vendido: true, reservado: false, reservadoHasta: null });
   }
+  await registrarHistorial("confirmar_pago", lista);
   cerrarModalAdmin();
 }
 
-// ===== FUNCIÓN CORREGIDA: ahora también borra el documento de compradores_privados =====
 async function liberarNumeroAdmin(ids){
   const lista = Array.isArray(ids) ? ids : [ids];
   for(const id of lista){
     await updateDoc(doc(db,"numeros",id), { vendido: false, reservado: false, reservadoHasta: null, reservaId: null });
-    // Borramos también los datos del comprador anterior para que el número
-    // quede "limpio" y pueda volver a reservarse sin error de permisos.
     try{
       await deleteDoc(doc(db,"compradores_privados",id));
+      delete datosCompradores[id]; // invalidamos la caché del buscador
     }catch(err){
       console.error("No se pudo borrar compradores_privados/" + id, err);
     }
   }
+  await registrarHistorial("liberar_o_anular", lista);
   cerrarModalAdmin();
 }
 
