@@ -34,15 +34,12 @@
   .leyenda span{display:flex; align-items:center; gap:5px;}
   .leyenda i{width:12px; height:12px; border-radius:3px; display:inline-block;}
   .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(58px,1fr)); gap:6px; max-width:1000px; margin:20px auto; padding:0 10px;}
-
-  /* ===== Mejora #11: accesibilidad — estilos de borde distintos por estado, además del color ===== */
-  .numero{aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:bold; color:#3a3a3a; cursor:pointer; font-size:13px; user-select:none; transition:transform .1s; border:2px solid rgba(0,0,0,.25);}
+  .numero{aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:bold; color:#3a3a3a; cursor:pointer; font-size:13px; user-select:none; transition:transform .1s; border:2px solid rgba(0,0,0,.1);}
   .numero:hover{transform:scale(1.08);}
-  .disponible{background:var(--verde); border-style:solid;}
-  .vendido{background:var(--rojo); color:#5a1f1f; border-style:double; border-width:4px;}
-  .reservado{background:var(--amarillo); color:#6b5900; border-style:dashed;}
-  .seleccionado{background:var(--azul); color:#1a1a1a; border-style:solid; box-shadow:0 0 0 3px #37474f inset;}
-
+  .disponible{background:var(--verde);}
+  .vendido{background:var(--rojo); color:#5a1f1f;}
+  .reservado{background:var(--amarillo); color:#6b5900;}
+  .seleccionado{background:var(--azul); color:#1a1a1a; box-shadow:0 0 0 3px #37474f inset;}
   .overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); align-items:center; justify-content:center; z-index:999; padding:15px;}
   .overlay.active{display:flex;}
   .modal{background:#fff; border-radius:12px; padding:24px 20px 20px 20px; width:100%; max-width:380px; max-height:90vh; overflow-y:auto; position:relative;}
@@ -52,7 +49,6 @@
   .modal-buttons{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;}
   .modal-buttons button{flex:1; padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; min-width:90px;}
   .btn-guardar{background:var(--neutro); color:#fff;}
-  .btn-guardar:disabled{opacity:.6; cursor:not-allowed;}
   .btn-cerrar{background:#ccc;}
   .btn-secundario{background:none; border:1px solid var(--neutro) !important; color:var(--neutro);}
   .loading{text-align:center; padding:20px; color:#888;}
@@ -181,10 +177,10 @@
 <p class="instruccion">👉 Tocá los números que querés comprar. Podés elegir más de uno.</p>
 
 <div class="leyenda">
-  <span><i style="background:var(--verde); border:2px solid rgba(0,0,0,.25);"></i> Disponible</span>
-  <span><i style="background:var(--azul); border:2px solid rgba(0,0,0,.25);"></i> Seleccionado</span>
-  <span><i style="background:var(--amarillo); border:2px dashed rgba(0,0,0,.4);"></i> Reservado (pendiente de pago)</span>
-  <span><i style="background:var(--rojo); border:3px double rgba(0,0,0,.4);"></i> Vendido</span>
+  <span><i style="background:var(--verde);"></i> Disponible</span>
+  <span><i style="background:var(--azul);"></i> Seleccionado</span>
+  <span><i style="background:var(--amarillo);"></i> Reservado (pendiente de pago)</span>
+  <span><i style="background:var(--rojo);"></i> Vendido</span>
 </div>
 
 <div class="toolbar">
@@ -210,21 +206,37 @@
       <div class="emoji-grande">💪</div>
       <h3>La historia de Nacho</h3>
     </div>
+
     <p class="historia-parrafo">Hay personas que enseñan con palabras. <b>Otras enseñan con el ejemplo.</b></p>
+
     <p class="historia-parrafo">Quienes conocen a Nacho saben que nunca fue solamente un profesor de entrenamiento. Siempre fue ese que alentó cuando alguien quería abandonar, el que creyó en sus alumnos cuando ellos mismos habían dejado de creer, el que demostró que la disciplina y la constancia pueden cambiar una vida.</p>
+
     <hr class="historia-divisor">
+
     <p class="historia-parrafo">Pero hace un tiempo, la vida le puso la prueba más difícil.</p>
+
     <p class="historia-parrafo">Un accidente cambió todo. Perdió una pierna, enfrentó meses de internaciones, cirugías y rehabilitación. Lo que para muchos habría significado un final, para él fue el comienzo de una nueva forma de vivir.</p>
+
     <div class="historia-destacado">"Nacho nunca dejó que una amputación definiera quién era."</div>
+
     <p class="historia-parrafo">Volvió a entrenar. Volvió a enseñar. Volvió a acompañar a cada persona que confía en él. Con una prótesis, con esfuerzo y con la misma pasión de siempre. Porque su propósito siempre fue más grande que cualquier obstáculo.</p>
+
     <hr class="historia-divisor">
+
     <p class="historia-parrafo"><b>Hoy queremos hacer algo por él.</b></p>
+
     <p class="historia-parrafo">No porque no pueda hacerlo solo, sino porque creemos en todo lo que construyó. Porque NH Fitness es mucho más que un grupo de entrenamiento: es un lugar donde muchas personas encontraron salud, confianza, disciplina y una comunidad que las impulsa a ser mejores.</p>
+
     <p class="historia-parrafo">Con esta rifa queremos aportar nuestro granito de arena para que NH Fitness siga creciendo y facilitar el trabajo diario de Nacho.</p>
+
     <div class="historia-destacado">Cada número que comprás no es solo una participación. Es una forma de apoyar un proyecto que transforma vidas.</div>
+
     <p class="historia-parrafo">Es una forma de agradecer a alguien que nunca dejó de dar lo mejor de sí y de demostrar que, cuando una comunidad crece unida, los sueños pesan mucho menos.</p>
+
     <hr class="historia-divisor">
+
     <p class="historia-parrafo" style="text-align:center;"><b>Gracias por ser parte de esta historia.</b><br>Porque las grandes transformaciones no las hace una sola persona. Las hace una comunidad que decide caminar unida, incluso cuando el camino parece cuesta arriba. 💛</p>
+
     <div class="modal-buttons">
       <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayHistoria')">Cerrar</button>
     </div>
@@ -270,6 +282,7 @@
       <span class="lugar">🎁 4to premio</span>
       <span class="valor">Parlante JBL Go Essential</span>
     </div>
+
     <div class="sorteo-info">
       <h4>🎲 ¿Cómo se realiza el sorteo?</h4>
       <p>El sorteo se llevará a cabo el <b>viernes 21 de agosto</b>, utilizando como base los resultados oficiales de la <b>Lotería Nacional – Sorteo Nocturno</b> de esa misma fecha.</p>
@@ -277,6 +290,7 @@
       <p>De esta manera, el resultado depende exclusivamente de un sorteo público, oficial y verificable, garantizando total transparencia en la definición de los ganadores.</p>
       <p>🔎 Podés verificar los resultados del sorteo de la Lotería Nacional de forma pública una vez finalizado, el mismo día, haciendo clic <a href="https://www.loteriadelaciudad.gob.ar/resultados" target="_blank" style="color:#2c3e50; font-weight:bold;">aquí</a>.</p>
     </div>
+
     <div class="modal-buttons">
       <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayPremios')">Cerrar</button>
     </div>
@@ -288,12 +302,14 @@
   <div class="modal">
     <button class="modal-close-x" onclick="cancelarReserva()">✕</button>
     <h3>Confirmar selección</h3>
+
     <div class="resumen-reserva">
       <p style="margin:0; font-size:13px; color:#666;">Números elegidos:</p>
       <div class="numeros-badges" id="listaSeleccionados"></div>
       <p style="margin:0; font-size:13px; color:#666;">Monto total a transferir:</p>
       <p class="monto" id="montoTotal">$0</p>
     </div>
+
     <hr class="paso-divisor">
     <div class="paso-titulo"><span class="paso-numero">1</span> Completá tus datos</div>
     <div class="datos-personales">
@@ -303,6 +319,7 @@
       <input type="text" id="reservaTelefono" placeholder="Ej: 11 2345 6789 (sin 0 ni 15)">
       <p class="whatsapp-hint" style="margin-left:0;">Escribí tu número sin el 0 de característica ni el 15 (Ej: si tu número es 011 15-2345-6789, escribí 1123456789).</p>
     </div>
+
     <hr class="paso-divisor">
     <div class="paso-titulo"><span class="paso-numero">2</span> Transferí el monto</div>
     <p class="paso-texto">Hacé la transferencia por el monto total al siguiente alias:</p>
@@ -311,17 +328,21 @@
       <span class="alias-valor">nh.rifa</span><br>
       <button type="button" class="btn-copiar" onclick="copiarAlias()">📋 Copiar alias</button>
     </div>
+
     <hr class="paso-divisor">
     <div class="paso-titulo"><span class="paso-numero">3</span> Enviá el comprobante</div>
     <p class="paso-texto">Una vez realizada la transferencia, descargá el comprobante y enviánoslo por mensaje directo de Instagram tocando el siguiente botón:</p>
     <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-directo">📩 Enviar comprobante por Instagram Directo</a>
+
     <hr class="paso-divisor">
     <a href="#" id="btnWhatsappReserva" class="btn-whatsapp" style="margin-left:0; width:100%; margin-top:12px;" target="_blank" onclick="return prepararWhatsapp('reserva')">📲 Enviarme este resumen por WhatsApp</a>
+
     <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
       ⏱ Te pedimos que transfieras dentro de los <b>15 minutos</b>. El administrador revisará tu pago manualmente y confirmará tu número apenas lo reciba — los números reservados no se liberan solos. Podés volver a esta página en cualquier momento y tocar el aviso amarillo de arriba, o el botón "Mis números", para ver estas instrucciones de nuevo.
     </p>
+
     <div class="modal-buttons">
-      <button class="btn-guardar" id="btnConfirmarReserva" onclick="confirmarReserva()">Reservar</button>
+      <button class="btn-guardar" onclick="confirmarReserva()">Reservar</button>
       <button class="btn-cerrar" onclick="cancelarReserva()">Cancelar</button>
     </div>
   </div>
@@ -332,12 +353,14 @@
   <div class="modal">
     <button class="modal-close-x" onclick="cerrarModal('overlayMiReserva')">✕</button>
     <h3>Tu reserva pendiente</h3>
+
     <div class="resumen-reserva">
       <p style="margin:0; font-size:13px; color:#666;">Números reservados:</p>
       <div class="numeros-badges" id="miReservaNumeros"></div>
       <p style="margin:0; font-size:13px; color:#666;">Monto total a transferir:</p>
       <p class="monto" id="miReservaMonto">$0</p>
     </div>
+
     <hr class="paso-divisor">
     <div class="paso-titulo"><span class="paso-numero">1</span> Transferí el monto</div>
     <p class="paso-texto">Si todavía no lo hiciste, transferí el monto total al siguiente alias:</p>
@@ -346,15 +369,19 @@
       <span class="alias-valor">nh.rifa</span><br>
       <button type="button" class="btn-copiar" onclick="copiarAlias()">📋 Copiar alias</button>
     </div>
+
     <hr class="paso-divisor">
     <div class="paso-titulo"><span class="paso-numero">2</span> Enviá el comprobante</div>
     <p class="paso-texto">Descargá el comprobante de la transferencia y enviánoslo por mensaje directo de Instagram tocando el siguiente botón:</p>
     <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-directo">📩 Enviar comprobante por Instagram Directo</a>
+
     <hr class="paso-divisor">
     <a href="#" id="btnWhatsappMiReserva" class="btn-whatsapp" style="margin-left:0; width:100%; margin-top:12px;" target="_blank" onclick="return prepararWhatsapp('miReserva')">📲 Enviarme este resumen por WhatsApp</a>
+
     <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
       ⏱ Te pedimos que transfieras dentro de los 15 minutos desde la reserva. El administrador confirmará tu pago manualmente apenas lo reciba — tu número queda a tu nombre hasta que el administrador lo revise.
     </p>
+
     <div class="modal-buttons">
       <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayMiReserva')">Cerrar</button>
     </div>
@@ -381,7 +408,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, orderBy, query, runTransaction
+  getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, orderBy, query, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -400,9 +427,40 @@ const PRECIO_UNITARIO = 5000;
 const MINUTOS_RESERVA = 15;
 const FECHA_SORTEO_TEXTO = "viernes 21 de agosto (Lotería Nacional - Sorteo Nocturno)";
 
-// Mejora #4: configuración del bot de Telegram para notificar al administrador
-const TELEGRAM_TOKEN = "TU_TOKEN_AQUI";
-const TELEGRAM_CHAT_ID = "TU_CHAT_ID_AQUI";
+// ===== Configuración de notificaciones por Telegram =====
+const TELEGRAM_TOKEN = "8735645615:AAGDWLYvyKXFMsvt3kt6bxyB82Lc7pLPJB8";
+const TELEGRAM_CHAT_IDS = [
+  "6208261912" // Administrador 1 — agregar más ids acá separados por coma si se suman más administradores
+];
+
+async function notificarAdminTelegram(nombre, telefono, listaNumeros, monto){
+  const fecha = new Date().toLocaleString("es-AR", {
+    timeZone: "America/Argentina/Buenos_Aires",
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit"
+  });
+
+  const mensaje =
+    `🎟 Nueva reserva - Rifa NH-Fitness\n\n` +
+    `👤 Nombre: ${nombre}\n` +
+    `📞 Teléfono: ${telefono}\n` +
+    `🔢 Números: ${listaNumeros.join(", ")}\n` +
+    `💰 Monto: $${monto.toLocaleString("es-AR")}\n` +
+    `🕐 Fecha y hora: ${fecha}`;
+
+  const envios = TELEGRAM_CHAT_IDS.map(chatId =>
+    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: mensaje
+      })
+    }).catch(err => console.error(`No se pudo notificar al chat ${chatId}:`, err))
+  );
+
+  await Promise.all(envios);
+}
 
 let numeros = [];
 let seleccionados = [];
@@ -495,8 +553,10 @@ window.copiarAlias = function(){
 
 function formatearTelefonoWhatsapp(telefono){
   let limpio = telefono.replace(/[^\d]/g, "");
+
   if(limpio.startsWith("0")) limpio = limpio.substring(1);
   limpio = limpio.replace(/^(\d{2,4})15(\d+)$/, "$1$2");
+
   if(limpio.startsWith("549")){
     // ya está completo
   } else if(limpio.startsWith("54")){
@@ -504,6 +564,7 @@ function formatearTelefonoWhatsapp(telefono){
   } else {
     limpio = "549" + limpio;
   }
+
   return limpio;
 }
 
@@ -518,6 +579,7 @@ function construirMensajeWhatsapp(listaNumeros, monto){
 
 window.prepararWhatsapp = function(origen){
   let telefono, listaNumeros, monto;
+
   if(origen === "reserva"){
     telefono = document.getElementById("reservaTelefono").value.trim();
     listaNumeros = seleccionados;
@@ -527,6 +589,7 @@ window.prepararWhatsapp = function(origen){
     listaNumeros = JSON.parse(localStorage.getItem("reservaNumeros") || "[]");
     monto = listaNumeros.length * PRECIO_UNITARIO;
   }
+
   if(!telefono){
     mostrarToast("Completá primero tu número de teléfono para poder enviarte el resumen.", "error");
     return false;
@@ -535,9 +598,11 @@ window.prepararWhatsapp = function(origen){
     mostrarToast("No hay números para incluir en el resumen.", "error");
     return false;
   }
+
   const telWhatsapp = formatearTelefonoWhatsapp(telefono);
   const mensaje = encodeURIComponent(construirMensajeWhatsapp(listaNumeros, monto));
   const url = `https://wa.me/${telWhatsapp}?text=${mensaje}`;
+
   window.open(url, "_blank");
   return false;
 };
@@ -545,63 +610,24 @@ window.prepararWhatsapp = function(origen){
 function agregarAlHistorial(idsNuevos, reservaId){
   const historial = JSON.parse(localStorage.getItem("historialNumeros") || "[]");
   const fecha = new Date().toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit", year:"numeric" });
+
   idsNuevos.forEach(numero => {
     const yaExiste = historial.some(h => h.numero === numero);
     if(!yaExiste){
       historial.push({ numero, reservaId, fecha });
     }
   });
+
   localStorage.setItem("historialNumeros", JSON.stringify(historial));
 }
 
-// ===== Mejora #7: validación de formato de teléfono =====
-function telefonoEsValido(telefono){
-  const soloDigitos = telefono.replace(/[^\d]/g, "");
-  return soloDigitos.length >= 8 && soloDigitos.length <= 15;
-}
-
-// ===== Mejora #4: notificación al administrador por Telegram =====
-async function notificarAdminTelegram(nombre, telefono, listaNumeros, monto){
-  if(TELEGRAM_TOKEN === "TU_TOKEN_AQUI" || TELEGRAM_CHAT_ID === "TU_CHAT_ID_AQUI") return; // todavía no configurado
-
-  const fecha = new Date().toLocaleString("es-AR", {
-    timeZone: "America/Argentina/Buenos_Aires",
-    day: "2-digit", month: "2-digit", year: "numeric",
-    hour: "2-digit", minute: "2-digit"
-  });
-
-  const mensaje =
-    `🎟 *Nueva reserva - Rifa NH-Fitness*\n\n` +
-    `👤 Nombre: ${nombre}\n` +
-    `📞 Teléfono: ${telefono}\n` +
-    `🔢 Números: ${listaNumeros.join(", ")}\n` +
-    `💰 Monto: $${monto.toLocaleString("es-AR")}\n` +
-    `🕐 Fecha y hora: ${fecha}`;
-
-  try{
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: mensaje, parse_mode: "Markdown" })
-    });
-  }catch(err){
-    console.error("No se pudo notificar por Telegram:", err);
-  }
-}
-
-// ===== FUNCIÓN PRINCIPAL — Mejoras #2 (transacción atómica), #7 (validación tel), #9 (loading), #4 (notificación) =====
+// ===== FUNCIÓN CORREGIDA: escritura atómica con writeBatch + notificación Telegram =====
 window.confirmarReserva = async function(){
   const nombre = document.getElementById("reservaNombre").value.trim();
   const telefono = document.getElementById("reservaTelefono").value.trim();
-  const btnReservar = document.getElementById("btnConfirmarReserva");
 
   if(!nombre || !telefono){
     mostrarToast("Por favor completá tu nombre y teléfono.", "error");
-    return;
-  }
-
-  if(!telefonoEsValido(telefono)){
-    mostrarToast("El teléfono ingresado no parece válido. Verificá que tenga entre 8 y 15 dígitos, sin espacios ni símbolos.", "error");
     return;
   }
 
@@ -610,53 +636,48 @@ window.confirmarReserva = async function(){
     return;
   }
 
+  const algunoNoDisponible = seleccionados.some(id => {
+    const n = numeros.find(x => x.id === id);
+    return !n || n.reservado || n.vendido;
+  });
+  if(algunoNoDisponible){
+    mostrarToast("Alguno de los números que elegiste ya no está disponible. Por favor, volvé a seleccionar.", "error");
+    seleccionados = [];
+    render();
+    document.getElementById("overlayReserva").classList.remove("active");
+    return;
+  }
+
   const vencimiento = Date.now() + MINUTOS_RESERVA*60*1000;
   const reservaId = "r_" + Date.now() + "_" + Math.random().toString(36).slice(2,8);
 
-  // Mejora #9: estado de carga en el botón
-  const textoOriginalBtn = btnReservar.textContent;
-  btnReservar.disabled = true;
-  btnReservar.textContent = "⏳ Reservando...";
-
   try{
-    // Mejora #2: runTransaction verifica disponibilidad justo en el momento de escribir,
-    // evitando que dos personas reserven el mismo número al mismo instante.
-    await runTransaction(db, async (transaction) => {
-      const refsNumeros = seleccionados.map(id => doc(db,"numeros",id));
-      const snaps = await Promise.all(refsNumeros.map(ref => transaction.get(ref)));
+    const batch = writeBatch(db);
 
-      for(const snap of snaps){
-        if(!snap.exists() || snap.data().vendido || snap.data().reservado){
-          throw new Error("NUMERO_NO_DISPONIBLE:" + snap.id);
-        }
-      }
-
-      refsNumeros.forEach(ref => {
-        transaction.update(ref, {
-          vendido: false,
-          reservado: true,
-          reservadoHasta: vencimiento,
-          reservaId: reservaId
-        });
+    seleccionados.forEach(id => {
+      batch.update(doc(db,"numeros",id), {
+        vendido: false,
+        reservado: true,
+        reservadoHasta: vencimiento,
+        reservaId: reservaId
       });
-
-      seleccionados.forEach(id => {
-        transaction.set(doc(db,"compradores_privados", id), {
-          nombre: nombre,
-          contacto: telefono,
-          reservaId: reservaId
-        });
+      batch.set(doc(db,"compradores_privados",id), {
+        nombre: nombre,
+        contacto: telefono,
+        reservaId: reservaId
       });
     });
+
+    await batch.commit();
+
+    // 👇 Notificación automática al/los administrador/es vía Telegram (best-effort)
+    notificarAdminTelegram(nombre, telefono, seleccionados, seleccionados.length * PRECIO_UNITARIO);
 
     localStorage.setItem("reservaVencimiento", vencimiento);
     localStorage.setItem("reservaNumeros", JSON.stringify(seleccionados));
     localStorage.setItem("reservaTelefono", telefono);
     agregarAlHistorial(seleccionados, reservaId);
     activarAvisoFlotante();
-
-    // Mejora #4: notificar al admin (no bloquea el flujo si falla)
-    notificarAdminTelegram(nombre, telefono, seleccionados, seleccionados.length * PRECIO_UNITARIO);
 
     document.getElementById("overlayReserva").classList.remove("active");
     document.getElementById("reservaNombre").value = "";
@@ -667,22 +688,13 @@ window.confirmarReserva = async function(){
     render();
 
   }catch(err){
+    mostrarToast("No se pudo completar la reserva (es posible que alguien haya tomado uno de estos números justo antes). Por favor, volvé a intentarlo.", "error");
     console.error(err);
-    if(String(err.message || "").startsWith("NUMERO_NO_DISPONIBLE")){
-      mostrarToast("Uno de los números que elegiste fue tomado por otra persona justo en este momento. Por favor, volvé a seleccionar.", "error");
-      seleccionados = [];
-      render();
-      document.getElementById("overlayReserva").classList.remove("active");
-    } else {
-      mostrarToast("No se pudo completar la reserva. Por favor, volvé a intentarlo.", "error");
-    }
-  }finally{
-    btnReservar.disabled = false;
-    btnReservar.textContent = textoOriginalBtn;
   }
 };
 
 window.cerrarBienvenida = function(){ document.getElementById("overlayBienvenida").classList.remove("active"); };
+
 window.abrirModal = function(id){ document.getElementById(id).classList.add("active"); };
 window.cerrarModal = function(id){ document.getElementById(id).classList.remove("active"); };
 
@@ -696,10 +708,13 @@ window.mostrarToast = function(mensaje, tipo){
 };
 
 function activarAvisoFlotante(){
-  document.getElementById("avisoFlotante").classList.add("activo");
+  const aviso = document.getElementById("avisoFlotante");
+  aviso.classList.add("activo");
 }
+
 function desactivarAvisoFlotante(){
-  document.getElementById("avisoFlotante").classList.remove("activo");
+  const aviso = document.getElementById("avisoFlotante");
+  aviso.classList.remove("activo");
   document.getElementById("overlayMiReserva").classList.remove("active");
 }
 
@@ -716,8 +731,10 @@ let ultimoEstadoNotificado = null;
 function revisarEstadoReservaLocal(){
   const numerosGuardadosRaw = localStorage.getItem("reservaNumeros");
   if(!numerosGuardadosRaw) return;
+
   const numerosGuardados = JSON.parse(numerosGuardadosRaw);
   if(!numerosGuardados || numerosGuardados.length === 0) return;
+
   const numerosEnBase = numerosGuardados.map(id => numeros.find(n => n.id === id)).filter(Boolean);
   if(numerosEnBase.length === 0) return;
 
@@ -758,10 +775,12 @@ window.abrirMisNumeros = function(){
   }
 
   const historialOrdenado = [...historial].reverse();
+
   contenedor.innerHTML = historialOrdenado.map(item => {
     const nActual = numeros.find(n => n.id === item.numero);
     let badgeClase = "badge-liberado";
     let badgeTexto = "⚪ Liberado";
+
     if(nActual){
       if(nActual.vendido){
         badgeClase = "badge-vendido";
@@ -771,6 +790,7 @@ window.abrirMisNumeros = function(){
         badgeTexto = "🟡 Pendiente de aprobación";
       }
     }
+
     return `
       <div class="historial-item">
         <div>
