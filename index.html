@@ -134,6 +134,8 @@
   .badge-reservado{background:var(--amarillo); color:#6b5900;}
   .badge-liberado{background:#e0e0e0; color:#666;}
   .historial-vacio{text-align:center; color:#888; font-size:13px; padding:20px 0;}
+  .input-error{border:2px solid #e74c3c !important;}
+  .error-hint{color:#c0392b; font-size:12px; margin-top:4px; display:none;}
 </style>
 </head>
 <body>
@@ -293,7 +295,7 @@
   </div>
 </div>
 
-<!-- Modal: Reserva -->
+<!-- Modal: Reserva (datos del comprador) -->
 <div class="overlay" id="overlayReserva">
   <div class="modal">
     <button class="modal-close-x" onclick="cancelarReserva()">✕</button>
@@ -313,33 +315,56 @@
       <input type="text" id="reservaNombre" placeholder="Ej: Juan Pérez">
       <label>Teléfono (WhatsApp)</label>
       <input type="text" id="reservaTelefono" placeholder="Ej: 11 2345 6789 (sin 0 ni 15)">
+      <p class="error-hint" id="errorTelefono">⚠ Ingresá un teléfono válido: solo números, mínimo 8 dígitos (ej: 1123456789).</p>
       <p class="whatsapp-hint" style="margin-left:0;">Escribí tu número sin el 0 de característica ni el 15 (Ej: si tu número es 011 15-2345-6789, escribí 1123456789).</p>
     </div>
-
-    <hr class="paso-divisor">
-    <div class="paso-titulo"><span class="paso-numero">2</span> Transferí el monto</div>
-    <p class="paso-texto">Hacé la transferencia por el monto total al siguiente alias:</p>
-    <div class="alias-box">
-      <span class="alias-label">Alias</span>
-      <span class="alias-valor">nh.rifa</span><br>
-      <button type="button" class="btn-copiar" onclick="copiarAlias()">📋 Copiar alias</button>
-    </div>
-
-    <hr class="paso-divisor">
-    <div class="paso-titulo"><span class="paso-numero">3</span> Enviá el comprobante</div>
-    <p class="paso-texto">Una vez realizada la transferencia, descargá el comprobante y enviánoslo por mensaje directo de Instagram tocando el siguiente botón:</p>
-    <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-directo">📩 Enviar comprobante por Instagram Directo</a>
-
-    <hr class="paso-divisor">
-    <a href="#" id="btnWhatsappReserva" class="btn-whatsapp" style="margin-left:0; width:100%; margin-top:12px;" target="_blank" onclick="return prepararWhatsapp('reserva')">📲 Enviarme este resumen por WhatsApp</a>
-
-    <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
-      ⏱ Te pedimos que transfieras dentro de los <b>15 minutos</b>. El administrador revisará tu pago manualmente y confirmará tu número apenas lo reciba — los números reservados no se liberan solos. Podés volver a esta página en cualquier momento y tocar el aviso amarillo de arriba, o el botón "Mis números", para ver estas instrucciones de nuevo.
-    </p>
 
     <div class="modal-buttons">
       <button class="btn-guardar" onclick="confirmarReserva()">Reservar</button>
       <button class="btn-cerrar" onclick="cancelarReserva()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Confirmación de reserva (aparece después de reservar) -->
+<div class="overlay" id="overlayConfirmacionReserva">
+  <div class="modal">
+    <button class="modal-close-x" onclick="cerrarModal('overlayConfirmacionReserva')">✕</button>
+    <h3>✅ Reserva confirmada</h3>
+
+    <p style="font-size:14px; color:#333; text-align:center;">Tus números ya han sido reservados.</p>
+
+    <div class="resumen-reserva">
+      <p style="margin:0; font-size:13px; color:#666;">Números reservados:</p>
+      <div class="numeros-badges" id="confirmacionNumeros"></div>
+      <p style="margin:0; font-size:13px; color:#666;">El monto total es:</p>
+      <p class="monto" id="confirmacionMonto">$0</p>
+    </div>
+
+    <hr class="paso-divisor">
+    <div class="paso-titulo"><span class="paso-numero">1</span> Transferí el monto</div>
+    <p class="paso-texto">El alias para tu transferencia es:</p>
+    <div class="alias-box">
+      <span class="alias-label">Alias</span>
+      <span class="alias-valor">NH.RIFA</span><br>
+      <button type="button" class="btn-copiar" onclick="copiarAlias()">📋 Copiar alias</button>
+    </div>
+
+    <hr class="paso-divisor">
+    <div class="paso-titulo"><span class="paso-numero">2</span> Enviá el comprobante</div>
+    <p class="paso-texto">Una vez hecha la transferencia, descargá tu comprobante y enviálo a:</p>
+    <a href="https://ig.me/m/nh.fitnes" target="_blank" class="btn-ig-directo">📩 Enviar comprobante por Instagram Directo</a>
+
+    <hr class="paso-divisor">
+    <p class="paso-texto" style="margin-left:0;">Podés enviarte un resumen de tu compra a tu WhatsApp haciendo clic acá:</p>
+    <a href="#" id="btnWhatsappConfirmacion" class="btn-whatsapp" style="margin-left:0; width:100%;" target="_blank" onclick="return prepararWhatsapp('confirmacion')">📲 Enviarme resumen por WhatsApp</a>
+
+    <p style="font-size:12px; color:#888; margin-top:14px; text-align:center;">
+      ⏱ Te pedimos que transfieras dentro de los 15 minutos. El administrador revisará tu pago manualmente y confirmará tu número apenas lo reciba.
+    </p>
+
+    <div class="modal-buttons">
+      <button class="btn-cerrar" style="width:100%;" onclick="cerrarModal('overlayConfirmacionReserva')">Cerrar</button>
     </div>
   </div>
 </div>
@@ -362,7 +387,7 @@
     <p class="paso-texto">Si todavía no lo hiciste, transferí el monto total al siguiente alias:</p>
     <div class="alias-box">
       <span class="alias-label">Alias</span>
-      <span class="alias-valor">nh.rifa</span><br>
+      <span class="alias-valor">NH.RIFA</span><br>
       <button type="button" class="btn-copiar" onclick="copiarAlias()">📋 Copiar alias</button>
     </div>
 
@@ -423,7 +448,6 @@ const PRECIO_UNITARIO = 5000;
 const MINUTOS_RESERVA = 15;
 const FECHA_SORTEO_TEXTO = "viernes 21 de agosto (Lotería Nacional - Sorteo Nocturno)";
 
-// ===== Configuración de notificaciones por Telegram =====
 const TELEGRAM_TOKEN = "8735645615:AAGDWLYvyKXFMsvt3kt6bxyB82Lc7pLPJB8";
 const TELEGRAM_CHAT_IDS = [
   "6208261912" // Administrador 1 — agregar más ids acá separados por coma si se suman más administradores
@@ -458,8 +482,18 @@ async function notificarAdminTelegram(nombre, telefono, listaNumeros, monto){
   await Promise.all(envios);
 }
 
+function esTelefonoValido(telefono){
+  const soloNumeros = telefono.replace(/[^\d]/g, "");
+  return soloNumeros.length >= 8 && soloNumeros.length <= 13;
+}
+
 let numeros = [];
 let seleccionados = [];
+
+// Guardan los datos de la última reserva exitosa, para mostrarlos en el modal de confirmación
+let ultimaReservaNumeros = [];
+let ultimaReservaTelefono = "";
+let ultimaReservaMonto = 0;
 
 const q = query(collection(db, "numeros"), orderBy("__name__"));
 onSnapshot(q, (snapshot) => {
@@ -532,6 +566,8 @@ window.abrirReserva = function(){
   if(seleccionados.length===0) return;
   renderBadges("listaSeleccionados", seleccionados);
   document.getElementById("montoTotal").textContent = "$" + (seleccionados.length*PRECIO_UNITARIO).toLocaleString("es-AR");
+  document.getElementById("errorTelefono").style.display = "none";
+  document.getElementById("reservaTelefono").classList.remove("input-error");
   document.getElementById("overlayReserva").classList.add("active");
 };
 
@@ -540,10 +576,10 @@ window.cancelarReserva = function(){
 };
 
 window.copiarAlias = function(){
-  navigator.clipboard.writeText("nh.rifa").then(()=>{
+  navigator.clipboard.writeText("NH.RIFA").then(()=>{
     mostrarToast("✅ Alias copiado al portapapeles", "exito");
   }).catch(()=>{
-    mostrarToast("No se pudo copiar. Copialo manualmente: nh.rifa", "info");
+    mostrarToast("No se pudo copiar. Copialo manualmente: NH.RIFA", "info");
   });
 };
 
@@ -568,7 +604,7 @@ function construirMensajeWhatsapp(listaNumeros, monto){
   return `🎟 *Rifa NH-Fitness*\n\n`
     + `Números reservados: ${listaNumeros.join(", ")}\n`
     + `Monto a transferir: $${monto.toLocaleString("es-AR")}\n`
-    + `Alias para transferir: nh.rifa\n\n`
+    + `Alias para transferir: NH.RIFA\n\n`
     + `📅 Fecha del sorteo: ${FECHA_SORTEO_TEXTO}\n\n`
     + `📩 Recordá enviar el comprobante por Instagram: https://ig.me/m/nh.fitnes`;
 }
@@ -576,10 +612,10 @@ function construirMensajeWhatsapp(listaNumeros, monto){
 window.prepararWhatsapp = function(origen){
   let telefono, listaNumeros, monto;
 
-  if(origen === "reserva"){
-    telefono = document.getElementById("reservaTelefono").value.trim();
-    listaNumeros = seleccionados;
-    monto = seleccionados.length * PRECIO_UNITARIO;
+  if(origen === "confirmacion"){
+    telefono = ultimaReservaTelefono;
+    listaNumeros = ultimaReservaNumeros;
+    monto = ultimaReservaMonto;
   } else {
     telefono = localStorage.getItem("reservaTelefono") || "";
     listaNumeros = JSON.parse(localStorage.getItem("reservaNumeros") || "[]");
@@ -587,7 +623,7 @@ window.prepararWhatsapp = function(origen){
   }
 
   if(!telefono){
-    mostrarToast("Completá primero tu número de teléfono para poder enviarte el resumen.", "error");
+    mostrarToast("No encontramos tu teléfono para enviarte el resumen.", "error");
     return false;
   }
   if(listaNumeros.length === 0){
@@ -617,13 +653,30 @@ function agregarAlHistorial(idsNuevos, reservaId){
   localStorage.setItem("historialNumeros", JSON.stringify(historial));
 }
 
-// ===== FUNCIÓN CORREGIDA: escritura atómica con writeBatch + notificación Telegram =====
+function abrirConfirmacionReserva(listaNumeros, monto){
+  renderBadges("confirmacionNumeros", listaNumeros);
+  document.getElementById("confirmacionMonto").textContent = "$" + monto.toLocaleString("es-AR");
+  document.getElementById("overlayConfirmacionReserva").classList.add("active");
+}
+
 window.confirmarReserva = async function(){
   const nombre = document.getElementById("reservaNombre").value.trim();
   const telefono = document.getElementById("reservaTelefono").value.trim();
+  const inputTelefono = document.getElementById("reservaTelefono");
+  const errorTelefono = document.getElementById("errorTelefono");
+
+  inputTelefono.classList.remove("input-error");
+  errorTelefono.style.display = "none";
 
   if(!nombre || !telefono){
     mostrarToast("Por favor completá tu nombre y teléfono.", "error");
+    return;
+  }
+
+  if(!esTelefonoValido(telefono)){
+    inputTelefono.classList.add("input-error");
+    errorTelefono.style.display = "block";
+    mostrarToast("El número de teléfono no es válido. Revisalo antes de continuar.", "error");
     return;
   }
 
@@ -646,6 +699,7 @@ window.confirmarReserva = async function(){
 
   const vencimiento = Date.now() + MINUTOS_RESERVA*60*1000;
   const reservaId = "r_" + Date.now() + "_" + Math.random().toString(36).slice(2,8);
+  const montoTotal = seleccionados.length * PRECIO_UNITARIO;
 
   try{
     const batch = writeBatch(db);
@@ -666,8 +720,11 @@ window.confirmarReserva = async function(){
 
     await batch.commit();
 
-    // 👇 Notificación automática al/los administrador/es vía Telegram (best-effort)
-    notificarAdminTelegram(nombre, telefono, seleccionados, seleccionados.length * PRECIO_UNITARIO);
+    notificarAdminTelegram(nombre, telefono, seleccionados, montoTotal);
+
+    ultimaReservaNumeros = seleccionados.slice();
+    ultimaReservaTelefono = telefono;
+    ultimaReservaMonto = montoTotal;
 
     localStorage.setItem("reservaVencimiento", vencimiento);
     localStorage.setItem("reservaNumeros", JSON.stringify(seleccionados));
@@ -678,7 +735,8 @@ window.confirmarReserva = async function(){
     document.getElementById("overlayReserva").classList.remove("active");
     document.getElementById("reservaNombre").value = "";
     document.getElementById("reservaTelefono").value = "";
-    mostrarToast("✅ Números reservados. Recordá transferir y enviar el comprobante — el administrador confirmará tu pago manualmente.", "exito");
+
+    abrirConfirmacionReserva(ultimaReservaNumeros, ultimaReservaMonto);
 
     seleccionados = [];
     render();
