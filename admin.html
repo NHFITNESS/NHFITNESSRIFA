@@ -461,7 +461,8 @@ document.getElementById("filtroEstado")?.addEventListener("change", render);
 <div class="overlay" id="overlayReservaManual">
   <div class="modal">
     <h3>Reservar manual</h3>
-    <p>Prueba de modal</p>
+    <label>Numeros separados por coma</label>
+    <input type="text" id="rmNumeros" placeholder="Ej: 001, 045, 128">
     <button onclick="document.getElementById('overlayReservaManual').classList.remove('active')">Cerrar</button>
   </div>
 </div>
