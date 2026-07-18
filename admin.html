@@ -23,6 +23,7 @@
   #filtroEstado{padding:10px; border-radius:8px; border:1px solid #ccc; background:#fff; font-weight:bold; cursor:pointer;}
   #logoutBtn{padding:10px 15px; border:none; border-radius:8px; background:var(--naranja); color:var(--negro); font-weight:bold; cursor:pointer;}
   #exportBtn{padding:10px 15px; border:none; border-radius:8px; background:#2c3e50; color:#fff; font-weight:bold; cursor:pointer;}
+  #reservarManualBtn{padding:10px 15px; border:none; border-radius:8px; background:var(--azul); color:#fff; font-weight:bold; cursor:pointer;}
   .contador-resultados{text-align:center; font-size:13px; color:#666; margin:-6px 0 10px 0;}
   .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(58px,1fr)); gap:6px; max-width:1000px; margin:20px auto; padding:0 10px;}
   .numero{aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:bold; color:#fff; cursor:pointer; font-size:13px; user-select:none; border:2px solid rgba(0,0,0,.15);}
@@ -35,7 +36,7 @@
   .modal{background:#fff; border-radius:12px; padding:20px; width:100%; max-width:360px; max-height:90vh; overflow-y:auto;}
   .modal h3{margin-top:0; text-align:center;}
   .modal label{display:block; margin-top:10px; font-size:14px; font-weight:bold;}
-  .modal input{width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:6px;}
+  .modal input, .modal select{width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:6px;}
   .modal-buttons{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;}
   .modal-buttons button{flex:1; padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; min-width:90px;}
   .btn-guardar{background:var(--verde); color:#fff;}
@@ -74,7 +75,7 @@
       <option value="reservado">🟡 Solo pendientes de aprobación</option>
       <option value="disponible">🟢 Solo disponibles</option>
     </select>
-    <button id="reservarManualBtn" onclick="document.getElementById('overlayReservaManual').classList.add('active')">Reservar manual</button>
+    <button id="reservarManualBtn" onclick="abrirModalReservaManual()">Reservar manual</button>
     <button id="exportBtn" onclick="exportarExcel()">📥 Exportar Excel</button>
     <button id="logoutBtn" onclick="logout()">Salir</button>
   </div>
@@ -98,10 +99,36 @@
   </div>
 </div>
 
+<div class="overlay" id="overlayReservaManual">
+  <div class="modal">
+    <h3>Reservar manual</h3>
+
+    <label>Numeros separados por coma</label>
+    <input type="text" id="rmNumeros" placeholder="Ej: 001, 045, 128">
+
+    <label>Nombre y apellido opcional</label>
+    <input type="text" id="rmNombre" placeholder="Ej: Reserva interna">
+
+    <label>Telefono opcional</label>
+    <input type="text" id="rmTelefono" placeholder="Ej: 1123456789">
+
+    <label>Tipo de carga</label>
+    <select id="rmTipo">
+      <option value="reservado">Reservado pendiente 15 min</option>
+      <option value="vendido">Vendido confirmado</option>
+    </select>
+
+    <div class="modal-buttons">
+      <button class="btn-guardar" onclick="guardarReservaManual()">Guardar</button>
+      <button class="btn-cerrar" onclick="cerrarModalReservaManual()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDoc, onSnapshot, updateDoc, orderBy, query
+  getFirestore, collection, doc, getDoc, onSnapshot, updateDoc, orderBy, query, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
@@ -121,6 +148,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 const PRECIO_UNITARIO = 5000;
+const MINUTOS_RESERVA = 15;
 
 let numeros = [];
 let esAdmin = false;
@@ -157,7 +185,6 @@ function estadoDe(n){
   return "disponible";
 }
 
-// Aplica un filtro de estado al tocar una de las cajitas de estadísticas.
 window.aplicarFiltroEstado = function(estado){
   filtroEstadoActual = estado;
   document.getElementById("filtroEstado").value = estado;
@@ -170,7 +197,6 @@ window.render = function(){
   filtroEstadoActual = document.getElementById("filtroEstado").value;
   grid.innerHTML = "";
 
-  // Resaltar visualmente la cajita de estadística activa
   ["statVendidos","statReservados","statDisponibles","statRecaudado"].forEach(id => {
     document.getElementById(id).classList.remove("activo");
   });
@@ -316,6 +342,114 @@ function cerrarModalAdmin(){
   document.getElementById("overlayNumero").classList.remove("active");
 }
 
+function esTelefonoValido(telefono){
+  const soloNumeros = telefono.replace(/[^0-9]/g, "");
+  return soloNumeros.length >= 8 && soloNumeros.length <= 13;
+}
+
+window.abrirModalReservaManual = function(){
+  document.getElementById("rmNumeros").value = "";
+  document.getElementById("rmNombre").value = "";
+  document.getElementById("rmTelefono").value = "";
+  document.getElementById("rmTipo").value = "reservado";
+  document.getElementById("overlayReservaManual").classList.add("active");
+};
+
+window.cerrarModalReservaManual = function(){
+  document.getElementById("overlayReservaManual").classList.remove("active");
+};
+
+window.guardarReservaManual = async function(){
+  const textoNumeros = document.getElementById("rmNumeros").value.trim();
+  const nombre = document.getElementById("rmNombre").value.trim() || "Carga manual Admin";
+  const telefono = document.getElementById("rmTelefono").value.trim();
+  const tipo = document.getElementById("rmTipo").value;
+
+  if(!textoNumeros){
+    alert("Ingresa al menos un numero.");
+    return;
+  }
+
+  if(telefono && !esTelefonoValido(telefono)){
+    alert("El telefono ingresado no es valido. Dejalo vacio o pone solo numeros con al menos 8 digitos.");
+    return;
+  }
+
+  const idsIngresados = textoNumeros.split(",").map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0; });
+
+  const longitudId = numeros.length > 0 ? numeros[0].id.length : 3;
+  const idsNormalizados = idsIngresados.map(function(s){
+    const soloDigitos = s.replace(/[^0-9]/g, "");
+    return soloDigitos.padStart(longitudId, "0");
+  });
+
+  const inexistentes = [];
+  const noDisponibles = [];
+  const validos = [];
+
+  idsNormalizados.forEach(function(id){
+    const n = numeros.find(function(x){ return x.id === id; });
+    if(!n){ inexistentes.push(id); return; }
+    const estado = estadoDe(n);
+    if(estado !== "disponible"){ noDisponibles.push(id + " " + estado); return; }
+    validos.push(id);
+  });
+
+  if(inexistentes.length > 0 || noDisponibles.length > 0){
+    let mensaje = "Hay problemas con algunos numeros.\n";
+    if(inexistentes.length > 0) mensaje += "\nNo existen: " + inexistentes.join(", ");
+    if(noDisponibles.length > 0) mensaje += "\nNo disponibles: " + noDisponibles.join(", ");
+    if(validos.length > 0) mensaje += "\n\nContinuar solo con los validos " + validos.join(", ") + " ?";
+    else mensaje += "\n\nNo quedan numeros validos.";
+
+    let continuar = false;
+    if(validos.length > 0){
+      continuar = confirm(mensaje);
+    } else {
+      alert(mensaje);
+    }
+    if(!continuar) return;
+  }
+
+  if(validos.length === 0){
+    alert("No hay numeros validos para guardar.");
+    return;
+  }
+
+  const reservaId = "r_admin_" + Date.now() + "_" + Math.random().toString(36).slice(2,8);
+  const esVenta = tipo === "vendido";
+  const vencimiento = Date.now() + MINUTOS_RESERVA*60*1000;
+
+  try{
+    const batch = writeBatch(db);
+
+    validos.forEach(function(id){
+      batch.update(doc(db,"numeros",id), {
+        vendido: esVenta,
+        reservado: !esVenta,
+        reservadoHasta: esVenta ? null : vencimiento,
+        reservaId: reservaId
+      });
+      batch.set(doc(db,"compradores_privados",id), {
+        nombre: nombre,
+        contacto: telefono || "-",
+        reservaId: reservaId,
+        creadoPorAdmin: true
+      });
+    });
+
+    await batch.commit();
+
+    document.getElementById("overlayReservaManual").classList.remove("active");
+
+    alert("Listo. " + validos.length + " numero cargado correctamente.");
+
+  }catch(err){
+    console.error(err);
+    alert("Ocurrio un error al guardar. Revisa la consola.");
+  }
+};
+
 window.exportarExcel = async function(){
   const vendidos = numeros.filter(n => n.vendido);
   const pendientes = numeros.filter(n => n.reservado);
@@ -458,14 +592,5 @@ document.getElementById("buscador")?.addEventListener("input", render);
 document.getElementById("filtroEstado")?.addEventListener("change", render);
 </script>
 
-<div class="overlay" id="overlayReservaManual">
-  <div class="modal">
-    <h3>Reservar manual</h3>
-    <label>Numeros separados por coma</label>
-    <input type="text" id="rmNumeros" placeholder="Ej: 001, 045, 128">
-    <button onclick="document.getElementById('overlayReservaManual').classList.remove('active')">Cerrar</button>
-  </div>
-</div>
-  
 </body>
 </html>
